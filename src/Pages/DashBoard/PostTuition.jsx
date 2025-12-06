@@ -18,7 +18,6 @@ const PostTuition = () => {
       class: String(data.class || '').trim(),
       location: String(data.location || '').trim(),
       budget: Number(data.budget || 0),
-      createdAt: new Date().toISOString(),
       createdBy: user?.email || null,
     }
 
@@ -79,46 +78,67 @@ const PostTuition = () => {
   }
 
   return (
-    <div>
-      <h2 className="text-5xl font-bold">Post a Tuition</h2>
+    <div className="max-w-4xl mx-auto p-8 bg-base-100 rounded-2xl shadow-xl mt-10">
+  <h2 className="text-4xl font-extrabold text-center mb-10">Post a Tuition</h2>
 
-      <form onSubmit={handleSubmit(handlePostTuition)} className="mt-12 p-4 text-black">
+  <form
+    onSubmit={handleSubmit(handlePostTuition)}
+    className="grid grid-cols-1 gap-10 text-black"
+  >
 
-        {/* subject & class */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-8">
-          <fieldset className="fieldset">
-            <label className="label">Subject</label>
-            <input type="text" {...register('subject')} className="input w-full" placeholder="e.g. Mathematics" />
-          </fieldset>
+    {/* subject & class */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <fieldset className="fieldset bg-base-200 p-5 rounded-xl shadow-sm">
+        <label className="label font-semibold text-lg">Subject</label>
+        <input
+          type="text"
+          {...register("subject")}
+          className="input input-bordered w-full"
+          placeholder="e.g. Physics, Math, English"
+        />
+      </fieldset>
 
-          <fieldset className="fieldset">
-            <label className="label">Class</label>
-            <input type="text" {...register('class')} className="input w-full" placeholder="e.g. Class 9" />
-          </fieldset>
-        </div>
-
-        {/* location & budget */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <fieldset className="fieldset">
-            <label className="label">Location</label>
-            <input type="text" {...register('location')} className="input w-full" placeholder="e.g. Dhanmondi, Dhaka" />
-          </fieldset>
-
-          <fieldset className="fieldset">
-            <label className="label">Budget (BDT)</label>
-            <input type="number" {...register('budget')} className="input w-full" placeholder="e.g. 4500" />
-          </fieldset>
-        </div>
-
-        {/* optional note or extra */}
-        <div className="mt-8">
-          <label className="label">Additional Note (optional)</label>
-          <textarea {...register('note')} className="textarea w-full" placeholder="Any additional details..."></textarea>
-        </div>
-
-        <input type="submit" className="btn btn-primary mt-8 text-black" value="Post Tuition" />
-      </form>
+      <fieldset className="fieldset bg-base-200 p-5 rounded-xl shadow-sm">
+        <label className="label font-semibold text-lg">Class</label>
+        <input
+          type="text"
+          {...register("class")}
+          className="input input-bordered w-full"
+          placeholder="e.g. Class 8, HSC, O-Level"
+        />
+      </fieldset>
     </div>
+
+    {/* location & budget */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <fieldset className="fieldset bg-base-200 p-5 rounded-xl shadow-sm">
+        <label className="label font-semibold text-lg">Location</label>
+        <input
+          type="text"
+          {...register("location")}
+          className="input input-bordered w-full"
+          placeholder="e.g. Dhanmondi, Chittagong, Mirpur"
+        />
+      </fieldset>
+
+      <fieldset className="fieldset bg-base-200 p-5 rounded-xl shadow-sm">
+        <label className="label font-semibold text-lg">Budget (BDT)</label>
+        <input
+          type="number"
+          {...register("budget")}
+          className="input input-bordered w-full"
+          placeholder="e.g. 5000"
+        />
+      </fieldset>
+    </div>
+
+    {/* submit button */}
+    <button className="btn btn-primary text-lg font-bold mt-4 w-full">
+      Post Tuition
+    </button>
+  </form>
+</div>
+
   )
 }
 

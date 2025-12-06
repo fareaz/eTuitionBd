@@ -1,23 +1,22 @@
 // src/pages/auth/Register.jsx
+import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { FcGoogle } from 'react-icons/fc'
 import { toast } from 'react-hot-toast'
 import { TbFidgetSpinner } from 'react-icons/tb'
 import { useForm } from 'react-hook-form'
 import useAuth from '../../hooks/useAuth'
-
-import { useState } from 'react'
-
-
+import useAxiosSecure from '../../hooks/useAxiosSecure'
 
 const Register = () => {
   const { createUser, updateUserProfile, signInWithGoogle, loading } = useAuth()
   const navigate = useNavigate()
+  const axiosSecure = useAxiosSecure()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
   const {
-    register,
+    register: formRegister,
     handleSubmit,
     formState: { errors },
   } = useForm({
@@ -28,26 +27,41 @@ const Register = () => {
 
   const [localUploading, setLocalUploading] = useState(false)
 
-  const onSubmit = async formData => {
-    console.log('Form Data:', formData)
-    const { name, email, password, role, phone } = formData
-    
+  // helper: save or update user in backend (no photoURL, no uid)
+  const saveOrUpdateUser = async userObj => {
+    try {
+      const res = await axiosSecure.post('/users', userObj)
+      // optional: you can inspect res.data
+      console.log('saveOrUpdateUser:', res.data)
+      return res.data
+    } catch (err) {
+      console.error('saveOrUpdateUser error:', err?.response?.data || err.message)
+      // don't block signup if saving fails; but notify developer/console
+      return null
+    }
+  }
 
+  const onSubmit = async formData => {
+    const { name, email, password, role, phone } = formData
     try {
       setLocalUploading(true)
-      const result = await createUser(email, password)
 
-      // 2. Save user in DB with role & phone
-    //   await saveOrUpdateUser({ name, email, image: imageURL, role, phone })
+      const result = await createUser(email, password) 
+      console.log('Firebase createUser result:', result)
 
-      // 3. Update firebase profile
-      const imageURL='';
-      await updateUserProfile(name  , role,  imageURL ,phone)
+      
+      await updateUserProfile(name, role, '', phone)
 
-  
+
+      await saveOrUpdateUser({
+        email,
+        name,
+        phone,
+        role,
+      })
+
       toast.success('Signup successful')
       navigate(from, { replace: true })
-      console.log('Register result:', result)
     } catch (err) {
       console.error('Register error:', err)
       toast.error(err?.message || 'Signup failed')
@@ -55,31 +69,31 @@ const Register = () => {
       setLocalUploading(false)
     }
   }
-      const handleGoogleSignIn = () => {
-         signInWithGoogle()
-            .then(result => {
-                console.log(result.user);
-                 // create user in the database
-            //     const userInfo = {
-            //         email: result.user.email,
-            //         displayName: result.user.displayName,
-            //         photoURL: result.user.photoURL,
-            //         role: 'Student',
-            //                  phone: '',
-            //     }
-            //      axiosSecure.post('/users', userInfo)
-            //         .then(res => {
-            //             console.log('user data has been stored', res.data)
-            //             navigate(location.state || '/');
-            //         })
-            toast.success('Signup successful')
-            navigate(from, { replace: true })
-           })
-            .catch(error => {
-                console.log(error)
-            })
-    }
 
+  const handleGoogleSignIn = () => {
+    signInWithGoogle()
+      .then(async result => {
+        console.log('Google sign-in user:', result.user)
+
+        // Prepare the user object (no photoURL, no uid)
+        const userInfo = {
+          email: result.user?.email || '',
+          name: result.user?.displayName || '',
+          phone: result.user?.phoneNumber || '',
+          role: 'Student',
+        }
+
+        // Save or update in backend
+        await saveOrUpdateUser(userInfo)
+
+        toast.success('Signup successful')
+        navigate(from, { replace: true })
+      })
+      .catch(error => {
+        console.error('Google sign-in error:', error)
+        toast.error('Google sign-in failed')
+      })
+  }
 
   return (
     <div className='flex justify-center items-center min-h-screen bg-white'>
@@ -105,7 +119,7 @@ const Register = () => {
                 id='name'
                 placeholder='Enter Your Name Here'
                 className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                {...register('name', {
+                {...formRegister('name', {
                   required: 'Name is required',
                   maxLength: {
                     value: 20,
@@ -127,7 +141,7 @@ const Register = () => {
                 <select
                   id='role'
                   className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                  {...register('role', { required: true })}
+                  {...formRegister('role', { required: true })}
                 >
                   <option value='Student'>Student</option>
                   <option value='Tutor'>Tutor</option>
@@ -143,10 +157,9 @@ const Register = () => {
                   id='phone'
                   placeholder='01XXXXXXXXX'
                   className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                  {...register('phone', {
+                  {...formRegister('phone', {
                     required: 'Phone is required',
                     pattern: {
-                      // simple BD phone pattern (starts with 01 and 11 digits total), adjust as needed
                       value: /^(?:\+?88)?01[3-9]\d{8}$/,
                       message: 'Please enter a valid phone number',
                     },
@@ -157,6 +170,7 @@ const Register = () => {
                 )}
               </div>
             </div>
+
             {/* Email */}
             <div>
               <label htmlFor='email' className='block mb-2 text-sm'>
@@ -167,7 +181,7 @@ const Register = () => {
                 id='email'
                 placeholder='Enter Your Email Here'
                 className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                {...register('email', {
+                {...formRegister('email', {
                   required: 'Email is required',
                   pattern: {
                     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -193,7 +207,7 @@ const Register = () => {
                 id='password'
                 placeholder='*******'
                 className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                {...register('password', {
+                {...formRegister('password', {
                   required: 'Password is required',
                   minLength: {
                     value: 6,

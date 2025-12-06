@@ -38,8 +38,8 @@ const Navbar = () => {
   }
 
   return (
-    <div className='w-full z-10 shadow-sm'>
-      <div className='py-2 border'>
+    <div className='max-w-7xl mx-auto z-10 shadow-sm '>
+      <div className='py-2 '>
         <Container>
           <div className='relative flex items-center justify-between'>
 
