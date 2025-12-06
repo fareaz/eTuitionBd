@@ -1,7 +1,13 @@
 import React from 'react';
 import { CiDeliveryTruck } from 'react-icons/ci';
 import { FaMotorcycle, FaRegCreditCard, FaUsers } from 'react-icons/fa';
+import { MdSwipeDownAlt } from "react-icons/md";
+import { IoIosCreate, IoMdCreate } from "react-icons/io";
 import { Link, NavLink, Outlet } from 'react-router';
+import { AiFillControl } from 'react-icons/ai';
+import { TiUserAdd } from 'react-icons/ti';
+import { RiUserAddFill } from 'react-icons/ri';
+import { FaCirclePlus } from 'react-icons/fa6';
 
 const DashboardLayout = () => {
     return (
@@ -38,25 +44,31 @@ const DashboardLayout = () => {
                         {/* our dashboard links */}
                         <li>
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Tuitions" to="/dashboard/my_tuitions">
-                                <CiDeliveryTruck />
+                                <MdSwipeDownAlt />
                                 <span className="is-drawer-close:hidden">My Tuitions</span>
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tuitions Management" to="/dashboard/tuitions-management">
+                                <AiFillControl />
+                                <span className="is-drawer-close:hidden">Tuitions Management</span>
                             </NavLink>
                         </li>
                          <li>
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Be a Tutor" to="/dashboard/be-a-tutor">
-                                <CiDeliveryTruck />
+                                <IoMdCreate />
                                 <span className="is-drawer-close:hidden">Be a Tutor</span>
                             </NavLink>
                         </li>
                          <li>
-                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Status" to="/dashboard/my-status">
-                                <CiDeliveryTruck />
-                                <span className="is-drawer-close:hidden">My Status</span>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tuitions Request" to="/dashboard/tuitions-request">
+                               <FaCirclePlus />
+                                <span className="is-drawer-close:hidden">Tuitions Request</span>
                             </NavLink>
                         </li>
                         <li>
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Post Tuition" to="/dashboard/post_tuition">
-                                <CiDeliveryTruck />
+                                    <IoIosCreate />
                                 <span className="is-drawer-close:hidden">Post Tuition</span>
                             </NavLink>
                         </li>
@@ -68,7 +80,7 @@ const DashboardLayout = () => {
                         </li>
                         <li>
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Tutors" to="/dashboard/approve-tutors">
-                                <FaMotorcycle />
+                                <RiUserAddFill />
                                 <span className="is-drawer-close:hidden">Approve Tutors</span>
                             </NavLink>
                         </li>

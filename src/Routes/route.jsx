@@ -8,6 +8,7 @@ import Tuitions from "../Pages/Tuitions/Tuitions";
 import About from "../Pages/About";
 import Contact from "../Pages/Contact";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import PostTuition from "../Pages/DashBoard/PostTuition";
 
 export const router = createBrowserRouter([
   {
@@ -47,7 +48,10 @@ export const router = createBrowserRouter([
   },
   {
        path: '/dashboard',
-    element: (    
-        <DashboardLayout />
-    ),
+    element:<DashboardLayout />,
+    children:[
+      {
+          path: 'post_tuition',
+           element:<PostTuition/>,
+    }]
   },]);
