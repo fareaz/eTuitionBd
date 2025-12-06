@@ -1,0 +1,53 @@
+import { createBrowserRouter } from "react-router";
+import MainLayout from "../Layouts/MainLayout";
+import Home from "../Pages/Home";
+import Login from "../Pages/Authentication/Login";
+import Register from "../Pages/Authentication/Register";
+import Tutors from "../Pages/Tutor/Tutors";
+import Tuitions from "../Pages/Tuitions/Tuitions";
+import About from "../Pages/About";
+import Contact from "../Pages/Contact";
+import DashboardLayout from "../Layouts/DashboardLayout";
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <Home></Home>,
+      },
+      {
+        path: "login",
+        element: <Login></Login>,
+      },
+      {
+        path: "register",
+        element:<Register></Register>
+      },
+      {
+        path: "tutors",
+        element: <Tutors></Tutors>,
+      },
+      {
+        path: "tuitions",
+        element: <Tuitions></Tuitions>,
+      },
+      {
+        path: "about",
+        element: <About></About>,
+      },
+      {
+        path: "contact",
+        element: <Contact></Contact>,
+      },
+      
+    ],
+  },
+  {
+       path: '/dashboard',
+    element: (    
+        <DashboardLayout />
+    ),
+  },]);
