@@ -11,8 +11,10 @@ import { FaCirclePlus } from 'react-icons/fa6';
 import useRole from '../hooks/useRole';
 
 const DashboardLayout = () => {
-  const {role} = useRole();
-  console.log(role); //TODO: get user role from auth context or hook
+  const {role, roleLoading} = useRole();
+
+  console.log('Dashboard role:', role, 'loading:', roleLoading);
+  const normalizedRole = (role || '').toLowerCase().trim();
     return (
         <div className="drawer lg:drawer-open max-w-7xl mx-auto border">
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -87,12 +89,25 @@ const DashboardLayout = () => {
                                 <span className="is-drawer-close:hidden">Approve Tutors</span>
                             </NavLink>
                         </li>
-                        <li>
+
+
+
+
+
+
+
+
+    
+
+                        {
+                          normalizedRole === 'admin' && (<li>
                                     <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Users Management" to="/dashboard/users-management">
                                         <FaUsers></FaUsers>
                                         <span className="is-drawer-close:hidden">Users Management</span>
                                     </NavLink>
-                                </li>
+                                </li>)
+                        }
+                       
 
                         {/* List item */}
                         <li>

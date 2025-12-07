@@ -11,6 +11,9 @@ import DashboardLayout from "../Layouts/DashboardLayout";
 import PostTuition from "../Pages/DashBoard/PostTuition";
 import BeATutor from "../Pages/DashBoard/BeATutor";
 import MyTuition from "../Pages/DashBoard/MyTuition";
+import UsersManagement from "../Pages/DashBoard/UserManagement";
+import AdminRoute from "./AdminRoute";
+import PrivateRoute from "./PrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +52,8 @@ export const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element:<PrivateRoute><DashboardLayout /></PrivateRoute> ,
+   
     children: [
       {
         path: "post_tuition",
@@ -62,6 +66,10 @@ export const router = createBrowserRouter([
       {
         path: "my_tuitions",
         element: <MyTuition></MyTuition>,
+      },
+      {
+        path: "users-management",
+        element:<UsersManagement></UsersManagement>
       },
     ],
   },
