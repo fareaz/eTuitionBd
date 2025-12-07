@@ -83,12 +83,7 @@ const DashboardLayout = () => {
                                 <span className="is-drawer-close:hidden">Payment History</span>
                             </NavLink>
                         </li>
-                        <li>
-                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Tutors" to="/dashboard/approve-tutors">
-                                <RiUserAddFill />
-                                <span className="is-drawer-close:hidden">Approve Tutors</span>
-                            </NavLink>
-                        </li>
+                       
 
 
 
@@ -100,12 +95,22 @@ const DashboardLayout = () => {
     
 
                         {
-                          normalizedRole === 'admin' && (<li>
+                          normalizedRole === 'admin' && (
+                            <>
+                              <li>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Tutors" to="/dashboard/approve-tutors">
+                                <RiUserAddFill />
+                                <span className="is-drawer-close:hidden">Approve Tutors</span>
+                            </NavLink>
+                        </li>
+                          <li>
                                     <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Users Management" to="/dashboard/users-management">
                                         <FaUsers></FaUsers>
                                         <span className="is-drawer-close:hidden">Users Management</span>
                                     </NavLink>
-                                </li>)
+                                </li></>
+                      
+                                )
                         }
                        
 
