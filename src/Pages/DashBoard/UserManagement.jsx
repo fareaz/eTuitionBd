@@ -20,8 +20,27 @@ const UsersManagement = () => {
 
     keepPreviousData: true
   });
-
+   
+  //  const handleMakeAdmin = user => {
+  //       const roleInfo = { role: 'admin' }
+  //       //TODO: must ask for confirmation before proceed
+  //       axiosSecure.patch(`/users/${user._id}/role`, roleInfo)
+  //           .then(res => {
+  //               console.log(res.data);
+  //               if (res.data.modifiedCount) {
+  //                   refetch();
+  //                   Swal.fire({
+  //                       position: "top-end",
+  //                       icon: "success",
+  //                       title: `${user.displayName} marked as an Admin`,
+  //                       showConfirmButton: false,
+  //                       timer: 2000
+  //                   });
+  //               }
+  //           })
+  //   }
   const handleMakeAdmin = async (user) => {
+  
     const roleInfo = { role: 'admin' };
 
     const confirm = await Swal.fire({
@@ -48,7 +67,7 @@ const UsersManagement = () => {
   };
 
   const handleRemoveAdmin = async (user) => {
-    const roleInfo = { role: 'user' };
+    const roleInfo = { role: 'student' };
 
     const confirm = await Swal.fire({
       title: `Remove admin from ${user.displayName}?`,
