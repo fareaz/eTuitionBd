@@ -96,7 +96,7 @@ const Navbar = () => {
               {isOpen && (
                 <div
                   id='nav-dropdown'
-                  className='absolute right-0 mt-2 w-56 rounded-xl shadow-md overflow-hidden text-sm border'
+                  className='absolute right-0 mt-2 w-56 rounded-xl shadow-md overflow-hidden bg-white text-sm border'
                 >
                   <div className='flex flex-col'>
                     <div className='md:hidden'>

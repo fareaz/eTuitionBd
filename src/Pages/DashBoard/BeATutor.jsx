@@ -36,7 +36,7 @@ const TutorApplyForm = () => {
   const onSubmit = async (data) => {
     try {
       const payload = {
-        role: currentRole,
+        role: "tutor",
         name: currentRole === 'Tutor' ? (user?.displayName || data.name) : data.name,
         email: user?.email,
         qualifications: data.qualifications || '',
