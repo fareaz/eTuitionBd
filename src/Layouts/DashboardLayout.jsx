@@ -8,8 +8,11 @@ import { AiFillControl } from 'react-icons/ai';
 import { TiUserAdd } from 'react-icons/ti';
 import { RiUserAddFill } from 'react-icons/ri';
 import { FaCirclePlus } from 'react-icons/fa6';
+import useRole from '../hooks/useRole';
 
 const DashboardLayout = () => {
+  const {role} = useRole();
+  console.log(role); //TODO: get user role from auth context or hook
     return (
         <div className="drawer lg:drawer-open max-w-7xl mx-auto border">
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />

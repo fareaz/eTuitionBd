@@ -10,6 +10,7 @@ import Contact from "../Pages/Contact";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import PostTuition from "../Pages/DashBoard/PostTuition";
 import BeATutor from "../Pages/DashBoard/BeATutor";
+import MyTuition from "../Pages/DashBoard/MyTuition";
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "register",
-        element:<Register></Register>
+        element: <Register></Register>,
       },
       {
         path: "tutors",
@@ -44,18 +45,24 @@ export const router = createBrowserRouter([
         path: "contact",
         element: <Contact></Contact>,
       },
-      
     ],
   },
   {
-       path: '/dashboard',
-    element:<DashboardLayout />,
-    children:[
+    path: "/dashboard",
+    element: <DashboardLayout />,
+    children: [
       {
-          path: 'post_tuition',
-           element:<PostTuition/>,
-    },{
-      path: 'be-a-tutor',
-      element:<BeATutor></BeATutor>
-    }]
-  },]);
+        path: "post_tuition",
+        element: <PostTuition />,
+      },
+      {
+        path: "be-a-tutor",
+        element: <BeATutor></BeATutor>,
+      },
+      {
+        path: "my_tuitions",
+        element: <MyTuition></MyTuition>,
+      },
+    ],
+  },
+]);
