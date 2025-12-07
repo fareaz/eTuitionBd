@@ -9,7 +9,7 @@ const Tuitions = () => {
   const axiosSecure = useAxiosSecure();
 
   // React Query: fetch all tuitions
-  const { data: tuitions = [], isLoading, isError, error, refetch } = useQuery({
+  const { data: tuitions = [], isLoading, isError, error  } = useQuery({
     queryKey: ['tuitions'],
     queryFn: async () => {
       const res = await axiosSecure.get('/tuitions');
