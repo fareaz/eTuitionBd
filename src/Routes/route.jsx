@@ -9,6 +9,7 @@ import About from "../Pages/About";
 import Contact from "../Pages/Contact";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import PostTuition from "../Pages/DashBoard/PostTuition";
+import BeATutor from "../Pages/DashBoard/BeATutor";
 
 export const router = createBrowserRouter([
   {
@@ -53,5 +54,8 @@ export const router = createBrowserRouter([
       {
           path: 'post_tuition',
            element:<PostTuition/>,
+    },{
+      path: 'be-a-tutor',
+      element:<BeATutor></BeATutor>
     }]
   },]);
