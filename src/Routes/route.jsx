@@ -19,6 +19,7 @@ import ApproveTuition from "../Pages/DashBoard/ApproveTuition";
 import MyApplications from "../Pages/DashBoard/MyApplications";
 import Error from "../Pages/Error";
 import DashboardHome from "../Pages/DashBoard/DashboardHome/DashboardHome";
+import ProfileSetting from "../Pages/DashBoard/ProfileSetting/ProfileSetting";
 
 export const router = createBrowserRouter([
   {
@@ -93,6 +94,11 @@ export const router = createBrowserRouter([
       {
         path: "users-management",
         element: <AdminRoute><UsersManagement></UsersManagement></AdminRoute>
+        
+      },
+      {
+        path: "profile-setting",
+        element: <ProfileSetting></ProfileSetting>
         
       },
     ],

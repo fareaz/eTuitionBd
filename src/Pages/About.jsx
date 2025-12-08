@@ -136,8 +136,8 @@ const About = () => {
             <a href="mailto:hello@etuitionbd.com" className="btn btn-primary">
               Email Us
             </a>
-            <a href="/dashboard/contact" className="btn btn-ghost">
-              Dashboard Contact
+            <a href="/contact" className="btn btn-outline">
+              Contact Page
             </a>
           </div>
 

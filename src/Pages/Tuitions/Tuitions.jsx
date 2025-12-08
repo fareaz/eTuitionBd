@@ -1,86 +1,86 @@
 // src/pages/Tuitions.jsx
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import useRole from '../../hooks/useRole';
 import toast from 'react-hot-toast';
 
+const PAGE_SIZES = [5, 10, 20, 50];
+
 const Tuitions = () => {
   const axiosSecure = useAxiosSecure();
   const { role, roleLoading } = useRole();
 
+  // ----- local state (hooks always declared)
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [searchText, setSearchText] = useState('');
-  const [sortOption, setSortOption] = useState('newest'); 
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sortOption, setSortOption] = useState('newest');
 
-  const { data: tuitions = [], isLoading, isError, error } = useQuery({
-    queryKey: ['approved-tuitions'],
-    queryFn: async () => {
-      const res = await axiosSecure.get('/approved-tuitions');
-      return res.data;
-    },
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchText.trim()), 300);
+    return () => clearTimeout(id);
+  }, [searchText]);
+
+  
+  const fetchTuitions = async ({ queryKey }) => {
+    const [_key, _page, _limit, _search, _sort] = queryKey;
+    const res = await axiosSecure.get(
+      `/approved-tuitions?page=${_page}&limit=${_limit}&search=${encodeURIComponent(_search)}&sort=${_sort}`
+    );
+    return res.data; 
+  };
+
+
+  const { data, isLoading,  isFetching } = useQuery({
+    queryKey: ['approved-tuitions', page, limit, debouncedSearch, sortOption],
+    queryFn: fetchTuitions,
+    keepPreviousData: true,
+    staleTime: 1000 * 30
   });
+
+
+  const total = data?.total || 0;
+  const tuitions = data?.results || [];
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  // reset page to 1 when controls change (hook always declared)
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, limit, sortOption]);
+
+  
+  const pagesToShow = useMemo(() => {
+    const pages = [];
+    const visible = 7;
+    let start = Math.max(1, page - Math.floor(visible / 2));
+    let end = Math.min(totalPages, start + visible - 1);
+    start = Math.max(1, end - visible + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }, [page, totalPages]);
+
 
   const handleApply = (tuition) => {
     toast.success(`Applied to tuition: ${tuition.subject}`);
   };
 
-  // combine search + sort (client-side)
-  const filteredSorted = useMemo(() => {
-    if (!Array.isArray(tuitions)) return [];
-
-    const q = String(searchText || '').trim().toLowerCase();
-
-   
-    let filtered = q
-      ? tuitions.filter(t => {
-          const subj = String(t.subject || '').toLowerCase();
-          const loc = String(t.location || '').toLowerCase();
-          return subj.includes(q) || loc.includes(q);
-        })
-      : [...tuitions];
-
-  
-    filtered.sort((a, b) => {
-      if (sortOption === 'newest') {
-        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-      }
-      if (sortOption === 'oldest') {
-        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-      }
-      if (sortOption === 'budget-asc') {
-        return (Number(a.budget) || 0) - (Number(b.budget) || 0);
-      }
-      if (sortOption === 'budget-desc') {
-        return (Number(b.budget) || 0) - (Number(a.budget) || 0);
-      }
-      return 0;
-    });
-
-    return filtered;
-  }, [tuitions, searchText, sortOption]);
-
 
   if (isLoading || roleLoading) return <LoadingSpinner />;
 
-  if (isError) {
-    return (
-      <p className="text-center mt-20 text-xl text-red-500">
-        Failed to load tuitions: {error?.message}
-      </p>
-    );
-  }
+
+
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold text-center mt-6 mb-4">
-        All Tuitions ({filteredSorted.length})
-      </h1>
+      <h1 className="text-3xl font-bold text-center mt-6 mb-4">All Tuitions</h1>
 
-     
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 ">
-        <div className="w-full md:w-1/2">
-          <label className="sr-only">Search tuitions</label>
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div className="flex-1 md:mr-4">
           <div className="relative">
             <input
               type="search"
@@ -95,116 +95,109 @@ const Tuitions = () => {
           </div>
         </div>
 
-        <div className="w-full md:w-1/3 justify-end flex items-center gap-3 ">
-          <label htmlFor="sort" className="text-sm text-gray-600 hidden md:block">Sort by:</label>
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <select
-            id="sort"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="select select-bordered w-full md:w-auto"
+            className="select select-bordered"
           >
             <option value="newest">Date: Newest first</option>
             <option value="oldest">Date: Oldest first</option>
             <option value="budget-desc">Budget: High → Low</option>
             <option value="budget-asc">Budget: Low → High</option>
           </select>
+
+          <select
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            className="select select-bordered w-28"
+          >
+            {PAGE_SIZES.map(s => <option key={s} value={s}>{s}/page</option>)}
+          </select>
         </div>
       </div>
 
-      {filteredSorted.length === 0 ? (
-        <p className="text-center text-gray-500">No tuitions found for your search.</p>
-      ) : (
-        <>
-          {/* Desktop / Tablet: table (md+) */}
-          <div className="hidden md:block overflow-x-auto rounded-xl shadow-lg bg-white">
-            <table className="table w-full">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="w-12">#</th>
-                  <th>Subject</th>
-                  <th>Class</th>
-                  <th>Location</th>
-                  <th>Budget (BDT)</th>
-                  <th>Posted</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+      <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+        <div>{isFetching ? <span>Updating...</span> : <span>{total} tuitions found</span>}</div>
+        <div><span>Page {page} / {totalPages}</span></div>
+      </div>
 
-              <tbody>
-                {filteredSorted.map((t, index) => (
-                  <tr key={t._id || index} className="hover:bg-gray-50">
-                    <th className="align-top">{index + 1}</th>
-                    <td className="font-semibold align-top">{t.subject}</td>
-                    <td className="align-top">{t.class}</td>
-                    <td className="align-top">{t.location}</td>
-                    <td className="font-medium text-green-600 align-top">৳{t.budget}</td>
-                    <td className="text-xs text-gray-500 align-top">
-                      {t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A'}
-                    </td>
-                    <td className="align-top">
-                      {role === 'tutor' ? (
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleApply(t)}
-                        >
-                          Apply
-                        </button>
-                      ) : (
-                        <button
-                          className="btn btn-sm btn-disabled"
-                          onClick={() => handleApply(t)}
-                          title="Only tutors can apply"
-                        >
-                          {role ? 'Apply (Tutors only)' : 'Apply (for Tutor)'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Table (desktop) */}
+      <div className="hidden md:block overflow-x-auto rounded-xl shadow-lg bg-white">
+        <table className="table w-full">
+          <thead className="bg-gray-100 text-gray-700 text-sm">
+            <tr>
+              <th className="w-12">#</th>
+              <th>Subject</th>
+              <th>Class</th>
+              <th>Location</th>
+              <th>Budget</th>
+              <th>Posted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-          {/* Mobile: cards */}
-          <div className="md:hidden space-y-4">
-            {filteredSorted.map((t, index) => (
-              <article
-                key={t._id || index}
-                className="bg-white rounded-lg shadow-sm border p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold">{t.subject}</h3>
-                    <p className="text-sm text-gray-600">{t.class}</p>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-green-600 font-semibold">৳{t.budget}</div>
-                    <div className="text-xs text-gray-400">#{index + 1}</div>
-                  </div>
-                </div>
-
-                <div className="mt-3 text-sm text-gray-700">
-                  <p><strong>Location:</strong> {t.location}</p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A'}
-                  </p>
-                </div>
-
-                <div className="mt-3 flex items-center gap-2">
+          <tbody>
+            {tuitions.map((t, idx) => (
+              <tr key={t._id || idx} className="hover:bg-gray-50">
+                <th>{(page - 1) * limit + idx + 1}</th>
+                <td className="font-semibold">{t.subject}</td>
+                <td>{t.class}</td>
+                <td>{t.location}</td>
+                <td className="text-green-600 font-semibold">৳{t.budget}</td>
+                <td className="text-xs text-gray-500">{t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A'}</td>
+                <td>
                   {role === 'tutor' ? (
                     <button className="btn btn-sm btn-primary" onClick={() => handleApply(t)}>Apply</button>
                   ) : (
-                    <button className="btn btn-sm btn-disabled" onClick={() => handleApply(t)} title="Only tutors can apply">
-                      {role ? 'Apply (Tutors only)' : 'Loading...'}
-                    </button>
+                    <button className="btn btn-sm btn-disabled" title="Only tutors can apply">Apply</button>
                   )}
-                </div>
-              </article>
+                </td>
+              </tr>
             ))}
-          </div>
-        </>
-      )}
+
+            {tuitions.length === 0 && (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-500">No tuitions found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Cards (mobile) */}
+      <div className="md:hidden space-y-4">
+        {tuitions.map((t, idx) => (
+          <article key={t._id || idx} className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold">{t.subject}</h3>
+                <p className="text-sm text-gray-600">{t.class} • {t.location}</p>
+                <p className="mt-2 text-sm text-gray-700">Budget: <span className="font-semibold text-green-600">৳{t.budget}</span></p>
+                <p className="mt-1 text-xs text-gray-400">{t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A'}</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {role === 'tutor' ? (
+                  <button className="btn btn-sm btn-primary" onClick={() => handleApply(t)}>Apply</button>
+                ) : (
+                  <button className="btn btn-sm btn-disabled">Apply</button>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
+
+        {tuitions.length === 0 && <div className="text-center text-gray-500 py-6">No tuitions found.</div>}
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center justify-center gap-2 mt-6 flex-wrap">
+        <button className="btn btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>‹ Prev</button>
+        {pagesToShow.map(pn => (
+          <button key={pn} onClick={() => setPage(pn)} className={`btn btn-sm ${pn === page ? 'btn-primary' : ''}`}>{pn}</button>
+        ))}
+        <button className="btn btn-sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next ›</button>
+        
+      </div>
     </div>
   );
 };

@@ -44,7 +44,7 @@ const Navbar = () => {
           <div className='relative flex items-center justify-between'>
 
             {/* Left: Brand */}
-            <Link to='/' className='text-lg font-semibold px-2 py-1 z-20'>
+            <Link to='/' className='text-lg font-bold px-2 py-1 z-20 text-primary'>
               eTuitionBd
             </Link>
 

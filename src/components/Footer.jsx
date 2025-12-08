@@ -5,7 +5,7 @@ import { FaXTwitter } from "react-icons/fa6";
 const Footer = () => {
   return (
     
-    <footer className="max-w-7xl mx-auto py-5 mt-10 z-10 shadow-sm">
+    <footer className="max-w-7xl mx-auto py-5  z-10 shadow-sm">
       <div className=" px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
 
         {/* About Platform */}
@@ -22,11 +22,11 @@ const Footer = () => {
         <div>
           <h2 className="text-xl font-semibold mb-3">Quick Links</h2>
           <ul className="space-y-2 text-sm">
-            <li><a href="/" className="hover:text-lime-400">Home</a></li>
-            <li><a href="/tuitions" className="hover:text-lime-400">Browse Tuitions</a></li>
-            <li><a href="/post-tuition" className="hover:text-lime-400">Post Tuition</a></li>
-            <li><a href="/login" className="hover:text-lime-400">Login</a></li>
-            <li><a href="/register" className="hover:text-lime-400">Register</a></li>
+            <li><a href="/" className="hover:text-blue-700">Home</a></li>
+            <li><a href="/tuitions" className="hover:text-blue-700">Browse Tuitions</a></li>
+            <li><a href="" className="hover:text-blue-700">Post Tuition</a></li>
+            <li><a href="" className="hover:text-blue-700">Login</a></li>
+            <li><a href="" className="hover:text-blue-700">Register</a></li>
           </ul>
         </div>
 
@@ -44,10 +44,10 @@ const Footer = () => {
         <div>
           <h2 className="text-xl font-semibold text-white mb-3">Follow Us</h2>
           <div className="flex items-center gap-4 text-2xl">
-            <a href="#" className="hover:text-lime-400"><FaFacebook /></a>
-            <a href="#" className="hover:text-lime-400"><FaInstagram /></a>
-            <a href="#" className="hover:text-lime-400"><FaLinkedin /></a>
-            <a href="#" className="hover:text-lime-400"><FaXTwitter /></a>
+            <a href="#" className="hover:text-blue-700"><FaFacebook /></a>
+            <a href="#" className="hover:text-blue-700"><FaInstagram /></a>
+            <a href="#" className="hover:text-blue-700"><FaLinkedin /></a>
+            <a href="#" className="hover:text-blue-700"><FaXTwitter /></a>
           </div>
         </div>
       </div>

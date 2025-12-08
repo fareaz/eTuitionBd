@@ -1,9 +1,14 @@
 import React from 'react';
+import Hero from '../components/Hero';
+import Container from '../components/Container';
 
 const Home = () => {
     return (
-        <div>
-            <h1 className='text-3xl font-bold text-center mt-10'>Welcome to eTuitionBd Home Page</h1>
+        <div className='max-w-7xl mx-auto'>
+            
+                <Hero></Hero>
+          
+            
         </div>
     );
 };
