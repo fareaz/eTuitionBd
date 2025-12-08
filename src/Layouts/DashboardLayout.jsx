@@ -1,8 +1,9 @@
 import React from 'react';
-import { CiDeliveryTruck } from 'react-icons/ci';
-import { FaMotorcycle, FaRegCreditCard, FaUsers } from 'react-icons/fa';
+import { GrMoney } from "react-icons/gr";
+import {  FaRegCreditCard, FaUsers } from 'react-icons/fa';
 import { MdCheckCircle, MdSwipeDownAlt } from "react-icons/md";
 import { IoIosCreate, IoMdCreate } from "react-icons/io";
+import { ImProfile } from "react-icons/im";
 import { Link, NavLink, Outlet } from 'react-router';
 import { AiFillControl } from 'react-icons/ai';
 import { TiUserAdd } from 'react-icons/ti';
@@ -11,10 +12,10 @@ import { FaCirclePlus } from 'react-icons/fa6';
 import useRole from '../hooks/useRole';
 
 const DashboardLayout = () => {
-  const {role, roleLoading} = useRole();
+  const {role} = useRole();
 
-  console.log('Dashboard role:', role, 'loading:', roleLoading);
-  const normalizedRole = (role || '').toLowerCase().trim();
+
+  const normalizedRole = role
     return (
         <div className="drawer lg:drawer-open max-w-7xl mx-auto border">
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -47,6 +48,9 @@ const DashboardLayout = () => {
                         </li>
 
                         {/* our dashboard links */}
+                         {
+                          normalizedRole === 'student' && (
+                        <>
                         <li>
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Tuitions" to="/dashboard/my_tuitions">
                                 <MdSwipeDownAlt />
@@ -57,18 +61,6 @@ const DashboardLayout = () => {
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tuitions Management" to="/dashboard/tuitions-management">
                                 <AiFillControl />
                                 <span className="is-drawer-close:hidden">Tuitions Management</span>
-                            </NavLink>
-                        </li>
-                         <li>
-                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Be a Tutor" to="/dashboard/be-a-tutor">
-                                <IoMdCreate />
-                                <span className="is-drawer-close:hidden">Be a Tutor</span>
-                            </NavLink>
-                        </li>
-                         <li>
-                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tuitions Request" to="/dashboard/tuitions-request">
-                               <FaCirclePlus />
-                                <span className="is-drawer-close:hidden">Tuitions Request</span>
                             </NavLink>
                         </li>
                         <li>
@@ -82,7 +74,39 @@ const DashboardLayout = () => {
                                 <FaRegCreditCard />
                                 <span className="is-drawer-close:hidden">Payment History</span>
                             </NavLink>
+                        </li></>)
+                        }
+                          
+                    {
+                          normalizedRole === 'tutor' && (
+                          <>
+                          <li>   
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Applications" to="/dashboard/my-applications">
+                                <ImProfile />
+                                <span className="is-drawer-close:hidden">My Applications</span>
+                            </NavLink>
                         </li>
+                         <li>   
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Apply Tutor" to="/dashboard/be-a-tutor">
+                                <IoMdCreate />
+                                <span className="is-drawer-close:hidden">Apply Tutor</span>
+                            </NavLink>
+                        </li>
+                         <li>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tuitions Request" to="/dashboard/tuitions-request">
+                               <FaCirclePlus />
+                                <span className="is-drawer-close:hidden">Tuitions Request</span>
+                            </NavLink>
+                        </li>
+                         <li>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Revenue History" to="/dashboard/revenue-history">
+                             <GrMoney />
+                                <span className="is-drawer-close:hidden">Revenue History</span>
+                            </NavLink>
+                        </li></>
+                         
+                          )
+                          }
                        
 
 

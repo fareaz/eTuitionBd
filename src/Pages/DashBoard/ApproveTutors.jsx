@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import Swal from 'sweetalert2';
 import { FaEye } from 'react-icons/fa';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const ApproveTutors = () => {
   const axiosSecure = useAxiosSecure();
@@ -60,7 +61,7 @@ const ApproveTutors = () => {
     }
   };
 
-  if (isLoading) return <div className="p-6 text-center">Loading tutors...</div>;
+  if (isLoading) return <LoadingSpinner></LoadingSpinner>;
 
   return (
     <div className="p-4">
@@ -137,7 +138,7 @@ const ApproveTutors = () => {
 
       {/* Mobile: stacked cards */}
       <div className="md:hidden space-y-4">
-        {tutors.map((t, i) => (
+        {tutors.map((t, ) => (
           <div key={t._id} className="card bg-base-100 shadow-sm border p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -206,21 +207,7 @@ const ApproveTutors = () => {
             </div>
 
             <div className="modal-action flex flex-wrap gap-2">
-              <button
-                className="btn btn-success"
-                onClick={() => setStatus(selectedTutor, 'Approved')}
-                disabled={selectedTutor.status === 'Approved'}
-              >
-                Approve
-              </button>
-
-              <button
-                className="btn btn-warning"
-                onClick={() => setStatus(selectedTutor, 'Rejected')}
-                disabled={selectedTutor.status === 'Rejected'}
-              >
-                Reject
-              </button>
+            
 
               <button className="btn btn-error" onClick={() => handleDelete(selectedTutor)}>
                 Delete

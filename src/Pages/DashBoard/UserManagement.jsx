@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { FaUserShield, FaTrash } from 'react-icons/fa';
-import { FiShieldOff } from 'react-icons/fi';
+import { FiEdit, FiShieldOff } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 
+
 const UsersManagement = () => {
   const axiosSecure = useAxiosSecure();
+  
   const [searchText, setSearchText] = useState('');
 
   const { refetch, data: users = [], isFetching } = useQuery({
@@ -18,73 +20,77 @@ const UsersManagement = () => {
     keepPreviousData: true,
   });
 
-  // Make Admin Function
+
+  const [editingUser, setEditingUser] = useState(null);
+  const [form, setForm] = useState({ email: '', name: '', phone: '', role: '' });
+  const [saving, setSaving] = useState(false);
+
+  const openEditModal = (u) => {
+    setEditingUser(u);
+    setForm({
+      email: u.email || '',
+      name: u.displayName || u.name || '',
+      phone: u.phone || '',
+      role: (u.role || '').trim()
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditingUser(null);
+    setForm({ email: '', name: '', phone: '', role: '' });
+    setSaving(false);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Make Admin / Remove Admin
   const handleMakeAdmin = async (user) => {
     const roleInfo = { role: 'admin' };
-
     const confirm = await Swal.fire({
       title: `Make ${user.displayName || user.email} an admin?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, make admin',
     });
-
     if (!confirm.isConfirmed) return;
-
     try {
       const res = await axiosSecure.patch(`/users/${user._id}/role`, roleInfo);
       if (res.data.modifiedCount) {
         await refetch();
-        Swal.fire({
-          position: "top-end",
-          icon: "success",
-          title: `${user.displayName || user.email} is now Admin`,
-          showConfirmButton: false,
-          timer: 2000
-        });
-      } else {
-        Swal.fire({ icon: 'info', title: 'No changes' });
-      }
+        Swal.fire({ position: "top-end", icon: "success", title: `${user.displayName || user.email} is now Admin`, showConfirmButton: false, timer: 2000 });
+      } else Swal.fire({ icon: 'info', title: 'No changes' });
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update role.' });
     }
   };
 
-  // Remove Admin Function
   const handleRemoveAdmin = async (user) => {
     const roleInfo = { role: 'student' };
-
     const confirm = await Swal.fire({
       title: `Remove admin from ${user.displayName || user.email}?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, remove admin',
     });
-
     if (!confirm.isConfirmed) return;
-
+    
     try {
       const res = await axiosSecure.patch(`/users/${user._id}/role`, roleInfo);
       if (res.data.modifiedCount) {
         await refetch();
-        Swal.fire({
-          position: "top-end",
-          icon: "success",
-          title: `${user.displayName || user.email} removed from Admin`,
-          showConfirmButton: false,
-          timer: 2000
-        });
-      } else {
-        Swal.fire({ icon: 'info', title: 'No changes' });
-      }
+        Swal.fire({ position: "top-end", icon: "success", title: `${user.displayName || user.email} removed from Admin`, showConfirmButton: false, timer: 2000 });
+      } else Swal.fire({ icon: 'info', title: 'No changes' });
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update role.' });
     }
   };
 
-  // DELETE ACCOUNT FUNCTION
+
   const handleDeleteUser = async (user) => {
     const confirm = await Swal.fire({
       title: `Delete ${user.displayName || user.email}?`,
@@ -95,25 +101,54 @@ const UsersManagement = () => {
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete user"
     });
-
     if (!confirm.isConfirmed) return;
-
     try {
       const res = await axiosSecure.delete(`/users/${user._id}`);
       if (res.data.deletedCount) {
         await refetch();
-        Swal.fire({
-          icon: "success",
-          title: "User Deleted Successfully",
-          timer: 1500,
-          showConfirmButton: false
-        });
-      } else {
-        Swal.fire({ icon: "error", title: "Could not delete user" });
-      }
+        Swal.fire({ icon: "success", title: "User Deleted Successfully", timer: 1500, showConfirmButton: false });
+      } else Swal.fire({ icon: "error", title: "Could not delete user" });
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: "error", title: "Error deleting account" });
+    }
+  };
+
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingUser) return;
+   
+    setSaving(true);
+
+    const payload = {
+      email: form.email?.toLowerCase().trim(),
+      name: form.name?.trim(),
+      phone: form.phone?.trim(),
+      role: form.role?.trim()
+    };
+
+  
+    if (!payload.email || !payload.name) {
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Email and name are required.' });
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const res = await axiosSecure.patch(`/users/${editingUser._id}`, payload);
+      if (res.data.modifiedCount || res.data.acknowledged) {
+        await refetch();
+        Swal.fire({ icon: 'success', title: 'User updated', timer: 1400, showConfirmButton: false });
+        closeEditModal();
+      } else {
+        Swal.fire({ icon: 'info', title: 'No changes' });
+        setSaving(false);
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: 'error', title: 'Update failed', text: err?.response?.data?.message || err.message || 'Server error' });
+      setSaving(false);
     }
   };
 
@@ -140,14 +175,7 @@ const UsersManagement = () => {
         </div>
       </div>
 
-      {/* Loading indicator */}
-      {isFetching && (
-        <div className="my-6">
-          <div className="text-gray-500">Loading users...</div>
-        </div>
-      )}
 
-      {/* Desktop / md+ : Table view */}
       <div className="hidden md:block">
         <div className="overflow-x-auto bg-white shadow-sm rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
@@ -182,6 +210,11 @@ const UsersManagement = () => {
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
+                    <button onClick={() => openEditModal(u)} className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 mr-2">
+                      <FiEdit />
+                      <span className="text-sm hidden lg:inline">Edit</span>
+                    </button>
+
                     <button onClick={() => handleDeleteUser(u)} className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700">
                       <FaTrash />
                       <span className="text-sm hidden lg:inline">Delete</span>
@@ -227,15 +260,54 @@ const UsersManagement = () => {
                   </button>
                 )}
 
-                <button onClick={() => handleDeleteUser(u)} className="flex items-center gap-2 px-3 py-1 rounded-md bg-red-600 text-white">
-                  <FaTrash />
-                  <span className="text-xs">Delete</span>
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => openEditModal(u)} className="flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-50 text-indigo-700">
+                    <FiEdit />
+                    <span className="text-xs">Edit</span>
+                  </button>
+
+                  <button onClick={() => handleDeleteUser(u)} className="flex items-center gap-2 px-3 py-1 rounded-md bg-red-600 text-white">
+                    <FaTrash />
+                    <span className="text-xs">Delete</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Edit Modal (simple dialog) */}
+      {editingUser && (
+        <dialog open className="modal modal-bottom sm:modal-middle">
+          <form onSubmit={handleSaveEdit} className="modal-box w-full max-w-lg">
+            <h3 className="font-bold text-lg">Edit User</h3>
+
+            <label className="label mt-3">
+              <span className="label-text">Email</span>
+            </label>
+            <input name="email" value={form.email} onChange={handleFormChange} className="input input-bordered w-full" />
+
+            <label className="label mt-3"><span className="label-text">Name</span></label>
+            <input name="name" value={form.name} onChange={handleFormChange} className="input input-bordered w-full" />
+
+            <label className="label mt-3"><span className="label-text">Phone</span></label>
+            <input name="phone" value={form.phone} onChange={handleFormChange} className="input input-bordered w-full" />
+
+            <label className="label mt-3"><span className="label-text">Role</span></label>
+            <select name="role" value={form.role} onChange={handleFormChange} className="select select-bordered w-full">
+              <option value="Student">Student</option>
+              <option value="Tutor">Tutor</option>
+              <option value="admin">admin</option>
+            </select>
+
+            <div className="modal-action">
+              <button type="button" className="btn" onClick={closeEditModal}>Cancel</button>
+              <button type="submit" className={`btn btn-primary ${saving ? 'loading' : ''}`}>Save</button>
+            </div>
+          </form>
+        </dialog>
+      )}
     </div>
   );
 };

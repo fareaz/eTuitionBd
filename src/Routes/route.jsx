@@ -16,6 +16,8 @@ import AdminRoute from "./AdminRoute";
 import PrivateRoute from "./PrivateRoute";
 import ApproveTutors from "../Pages/DashBoard/ApproveTutors";
 import ApproveTuition from "../Pages/DashBoard/ApproveTuition";
+import MyApplications from "../Pages/DashBoard/MyApplications";
+import Error from "../Pages/Error";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +64,10 @@ export const router = createBrowserRouter([
         element: <PostTuition />,
       },
       {
+        path: "my-applications",
+        element: <MyApplications></MyApplications>,
+      },
+      {
         path: "be-a-tutor",
         element: <BeATutor></BeATutor>,
       },
@@ -86,4 +92,9 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "*",
+    element: <Error />
+  }
+  
 ]);

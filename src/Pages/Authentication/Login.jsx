@@ -1,7 +1,9 @@
+// src/pages/auth/Login.jsx
 import React from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router' // react-router-dom
 import { FcGoogle } from 'react-icons/fc'
 import { TbFidgetSpinner } from 'react-icons/tb'
+import { useForm } from 'react-hook-form'
 import useAuth from '../../hooks/useAuth'
 import toast from 'react-hot-toast'
 import LoadingSpinner from '../../components/LoadingSpinner'
@@ -14,7 +16,16 @@ const Login = () => {
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
-  // helper to save user on Google sign-in
+  // react-hook-form setup
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: '', password: '' },
+  })
+
   const saveOrUpdateUser = async userObj => {
     try {
       const res = await axiosSecure.post('/users', userObj)
@@ -28,19 +39,29 @@ const Login = () => {
   if (loading) return <LoadingSpinner />
   if (user) return <Navigate to={from} replace={true} />
 
-  // form submit handler
-  const handleSubmit = async event => {
-    event.preventDefault()
-    const form = event.target
-    const email = form.email.value
-    const password = form.password.value
+  // helper to handle the specific firebase credential error
+  const handleFirebaseInvalidCredential = (err, resetFn) => {
+    // err may be an Error or firebase error object with .code
+    const code = err?.code || err?.message || ''
+    if (code === 'auth/invalid-credential' || code.includes('invalid-credential')) {
+      // reset the form inputs
+      resetFn()
+      toast.error('Invalid credential — form has been reset. Please try again.')
+      return true
+    }
+    return false
+  }
 
+  // form submit handler (email/password)
+  const onSubmit = async data => {
     try {
-      await signIn(email, password)
+      await signIn(data.email, data.password)
       toast.success('Login Successful')
       navigate(from, { replace: true })
     } catch (err) {
       console.error('Login error:', err)
+      // reset form if specific firebase error
+      if (handleFirebaseInvalidCredential(err, reset)) return
       toast.error(err?.message || 'Login failed')
     }
   }
@@ -63,6 +84,8 @@ const Login = () => {
       navigate(from, { replace: true })
     } catch (error) {
       console.error('Google sign-in error:', error)
+      // reset form on invalid-credential as requested
+      if (handleFirebaseInvalidCredential(error, reset)) return
       toast.error('Google sign-in failed')
     }
   }
@@ -75,18 +98,18 @@ const Login = () => {
           <p className='text-sm text-gray-400'>Sign in to access your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className='space-y-6'>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className='space-y-6'>
           <div className='space-y-4'>
             <div>
               <label htmlFor='email' className='block mb-2 text-sm'>Email address</label>
               <input
                 type='email'
-                name='email'
                 id='email'
-                required
+                {...register('email', { required: 'Email is required' })}
                 placeholder='Enter Your Email Here'
                 className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
               />
+              {errors.email && <p className='text-xs text-red-600 mt-1'>{errors.email.message}</p>}
             </div>
 
             <div>
@@ -95,19 +118,23 @@ const Login = () => {
               </div>
               <input
                 type='password'
-                name='password'
-                autoComplete='current-password'
                 id='password'
-                required
+                autoComplete='current-password'
+                {...register('password', { required: 'Password is required' })}
                 placeholder='*******'
                 className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
               />
+              {errors.password && <p className='text-xs text-red-600 mt-1'>{errors.password.message}</p>}
             </div>
           </div>
 
           <div>
-            <button type='submit' className='bg-lime-500 w-full rounded-md py-3 text-white'>
-              {loading ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
+            <button
+              type='submit'
+              className='bg-lime-500 w-full rounded-md py-3 text-white flex items-center justify-center'
+              disabled={isSubmitting || loading}
+            >
+              {(isSubmitting || loading) ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
             </button>
           </div>
         </form>
@@ -124,7 +151,10 @@ const Login = () => {
           <div className='flex-1 h-px sm:w-16 dark:bg-gray-700'></div>
         </div>
 
-        <div onClick={handleGoogleSignIn} className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer'>
+        <div
+          onClick={handleGoogleSignIn}
+          className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 rounded cursor-pointer'
+        >
           <FcGoogle size={32} />
           <p>Continue with Google</p>
         </div>
