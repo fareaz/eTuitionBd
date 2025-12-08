@@ -15,6 +15,7 @@ import UsersManagement from "../Pages/DashBoard/UserManagement";
 import AdminRoute from "./AdminRoute";
 import PrivateRoute from "./PrivateRoute";
 import ApproveTutors from "../Pages/DashBoard/ApproveTutors";
+import ApproveTuition from "../Pages/DashBoard/ApproveTuition";
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +72,11 @@ export const router = createBrowserRouter([
       {
         path: "approve-tutors",
         element: <AdminRoute><ApproveTutors></ApproveTutors></AdminRoute>
+        
+      },
+      {
+        path: "approve-tuitions",
+        element: <AdminRoute><ApproveTuition></ApproveTuition></AdminRoute>
         
       },
       {

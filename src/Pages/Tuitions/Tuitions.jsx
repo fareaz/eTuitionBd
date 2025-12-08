@@ -8,11 +8,11 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 const Tuitions = () => {
   const axiosSecure = useAxiosSecure();
 
-  // React Query: fetch all tuitions
+
   const { data: tuitions = [], isLoading, isError, error } = useQuery({
-    queryKey: ['tuitions'],
+    queryKey: ['approved-tuitions'],
     queryFn: async () => {
-      const res = await axiosSecure.get('/tuitions');
+      const res = await axiosSecure.get('/approved-tuitions');
       return res.data;
     },
   });

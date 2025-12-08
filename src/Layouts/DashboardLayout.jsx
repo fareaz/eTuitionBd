@@ -1,7 +1,7 @@
 import React from 'react';
 import { CiDeliveryTruck } from 'react-icons/ci';
 import { FaMotorcycle, FaRegCreditCard, FaUsers } from 'react-icons/fa';
-import { MdSwipeDownAlt } from "react-icons/md";
+import { MdCheckCircle, MdSwipeDownAlt } from "react-icons/md";
 import { IoIosCreate, IoMdCreate } from "react-icons/io";
 import { Link, NavLink, Outlet } from 'react-router';
 import { AiFillControl } from 'react-icons/ai';
@@ -101,6 +101,12 @@ const DashboardLayout = () => {
                             <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Tutors" to="/dashboard/approve-tutors">
                                 <RiUserAddFill />
                                 <span className="is-drawer-close:hidden">Approve Tutors</span>
+                            </NavLink>
+                        </li>
+                              <li>
+                            <NavLink className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Tuitions" to="/dashboard/approve-tuitions">
+                                <MdCheckCircle />
+                                <span className="is-drawer-close:hidden">Approve Tuitions</span>
                             </NavLink>
                         </li>
                           <li>

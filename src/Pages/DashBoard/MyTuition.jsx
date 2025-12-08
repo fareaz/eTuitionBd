@@ -157,6 +157,7 @@ const MyTuition = () => {
               <th>Location</th>
               <th>Budget</th>
               <th>Created At</th>
+              <th>Status</th>
               <th className="w-56">Actions</th>
             </tr>
           </thead>
@@ -169,6 +170,19 @@ const MyTuition = () => {
                 <td>{t.location}</td>
                 <td className="text-green-600 font-semibold">৳{t.budget}</td>
                 <td className="text-sm text-gray-500">{formatDate(t.createdAt)}</td>
+                 <td>
+                  <span
+                    className={`badge badge-lg px-4 py-2 ${
+                      t.status === 'Approved'
+                        ? 'bg-green-100 text-green-700 border border-green-300'
+                        : t.status === 'Rejected'
+                        ? 'bg-red-100 text-red-700 border border-red-300'
+                        : 'bg-gray-100 text-gray-700 border border-gray-300'
+                    }`}
+                  >
+                    {t.status || 'Pending'}
+                  </span>
+                </td>
                 <td className="flex items-center gap-2">
                   <button
                     onClick={() => openEditModal(t)}
