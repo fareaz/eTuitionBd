@@ -9,17 +9,16 @@ const useRole = () => {
 
   const { data: rawRole, isLoading: roleLoading, isError, error } = useQuery({
     queryKey: ['user-role', user?.email],
-    enabled: !!user?.email, // don't run until we have user.email
+    enabled: !!user?.email, 
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/${encodeURIComponent(user.email)}/role`);
-      // Debug: console the raw response (remove later)
+      const res = await axiosSecure.get(`/users/${(user.email)}/role`);
       console.log('useRole -> api response', res?.data);
       return res?.data?.role || null;
     },
-    // optional: staleTime: 5 * 60 * 1000
+    
   });
 
-  // Normalize role (lowercase & trimmed) or null if unknown
+ 
   const role = rawRole ? String(rawRole).trim().toLowerCase() : null;
 
   return { role, roleLoading, isError, error };

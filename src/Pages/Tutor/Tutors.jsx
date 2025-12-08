@@ -2,6 +2,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Tutors = () => {
   const axiosSecure = useAxiosSecure();
@@ -14,7 +15,7 @@ const Tutors = () => {
     }
   });
 
-  if (isLoading) return <div className="text-center py-10">Loading Tutors...</div>;
+  if (isLoading) return<LoadingSpinner></LoadingSpinner>;
 
   const handleHire = (tutor) => {
     // open user's email client with prefilled subject/body

@@ -18,6 +18,7 @@ import ApproveTutors from "../Pages/DashBoard/ApproveTutors";
 import ApproveTuition from "../Pages/DashBoard/ApproveTuition";
 import MyApplications from "../Pages/DashBoard/MyApplications";
 import Error from "../Pages/Error";
+import DashboardHome from "../Pages/DashBoard/DashboardHome/DashboardHome";
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
     element:<PrivateRoute><DashboardLayout /></PrivateRoute> ,
    
     children: [
+      {
+        index: true,
+        Component: DashboardHome
+      },
       {
         path: "post_tuition",
         element: <PostTuition />,
