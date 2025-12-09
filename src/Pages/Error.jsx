@@ -5,7 +5,7 @@ const Error = () => {
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
       
-      <h1 className="text-7xl md:text-9xl font-extrabold text-lime-500 drop-shadow-md">
+      <h1 className="text-7xl md:text-9xl font-extrabold text-primary drop-shadow-md">
         404
       </h1>
 
@@ -19,7 +19,7 @@ const Error = () => {
 
       <Link
         to="/"
-        className="mt-6 px-6 py-3 bg-lime-500 text-white text-lg font-medium rounded-lg shadow hover:bg-lime-600 transition-all"
+        className="mt-6 px-6 py-3 bg-primary text-white text-lg font-medium rounded-lg shadow hover:bg-primary-dark transition-all"
       >
         Go Back Home
       </Link>

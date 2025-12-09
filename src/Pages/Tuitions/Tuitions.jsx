@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import useRole from '../../hooks/useRole';
-import toast from 'react-hot-toast';
+import Swal from "sweetalert2";
 
 const PAGE_SIZES = [5, 10, 20, 50];
 
@@ -12,7 +12,7 @@ const Tuitions = () => {
   const axiosSecure = useAxiosSecure();
   const { role, roleLoading } = useRole();
 
-  // ----- local state (hooks always declared)
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchText, setSearchText] = useState('');
@@ -64,9 +64,84 @@ const Tuitions = () => {
   }, [page, totalPages]);
 
 
-  const handleApply = (tuition) => {
-    toast.success(`Applied to tuition: ${tuition.subject}`);
-  };
+ // inside Tuitions.jsx (replace handleApply)
+
+
+const handleApply = async (tuition) => {
+  if (role !== "tutor") {
+    Swal.fire({
+      icon: "error",
+      title: "Only tutors can apply!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+    return;
+  }
+
+  // SweetAlert confirmation
+  const confirm = await Swal.fire({
+    title: "Apply for this tuition?",
+    text: `Subject: ${tuition.subject}\nLocation: ${tuition.location}`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Apply!",
+  });
+
+  if (!confirm.isConfirmed) return; // user cancelled
+
+  try {
+    const payload = { tuitionId: tuition._id };
+    const res = await axiosSecure.post("/applications", payload);
+
+    if (res.status === 201) {
+      Swal.fire({
+        icon: "success",
+        title: "Applied Successfully!",
+        text: "Your application has been submitted.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      // optional: refetch
+      // refetchTuitions();
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Applied",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.message;
+
+    if (status === 409) {
+      Swal.fire({
+        icon: "warning",
+        title: "Already Applied!",
+        text: msg || "You already applied to this tuition.",
+      });
+    } else if (status === 401 || status === 403) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "Please login again.",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Apply Failed",
+        text: msg || "Something went wrong. Try again.",
+      });
+    }
+
+    console.error("Apply error", err);
+  }
+};
+
+
 
 
   if (isLoading || roleLoading) return <LoadingSpinner />;
