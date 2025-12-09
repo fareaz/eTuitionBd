@@ -155,7 +155,7 @@ const UsersManagement = () => {
   return (
     <div className="px-4 md:px-6 lg:px-8 py-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <h2 className='text-2xl md:text-4xl font-semibold'>Manage Users <span className="text-sm text-gray-500">({users.length})</span></h2>
+        <h2 className='text-2xl md:text-4xl font-semibold'>Manage <span className='text-primary'>Users</span> <span className="text-sm text-gray-500">({users.length})</span></h2>
 
         <div className="w-full md:w-1/3">
           <label htmlFor="search" className="sr-only">Search users</label>

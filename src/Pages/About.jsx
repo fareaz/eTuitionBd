@@ -22,7 +22,7 @@ const About = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-2 items-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-extrabold mb-4">About eTuitionBd</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold mb-4">About e<span className='text-primary'>Tuition</span>Bd</h1>
               <p className="text-gray-700 leading-relaxed text-base md:text-lg">
                 The Tuition Management System is a complete platform where students, tutors, and admins can
                 manage tuition activities including tuition posting, tutor applications, financial tracking,
@@ -43,7 +43,7 @@ const About = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="font-semibold mb-3">Why eTuitionBd?</h3>
+              <h3 className="font-semibold mb-3">Why e<span className='text-primary'>Tuition</span>Bd?</h3>
               <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
                 <li>Easy tuition posting and discovery for students</li>
                 <li>Streamlined tutor application and approval workflow</li>
@@ -59,7 +59,7 @@ const About = () => {
       {/* Features */}
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6">Platform features</h2>
+          <h2 className="text-2xl font-bold mb-6">Platform <span className='text-primary'>Features</span></h2>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Feature
@@ -93,7 +93,7 @@ const About = () => {
       {/* Stats */}
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-xl font-bold mb-6">Quick stats</h3>
+          <h3 className="text-xl font-bold mb-6">Quick <span className='text-primary'>Stats</span></h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <Stat value="1.2K+" label="Active Students" />
             <Stat value="450+" label="Approved Tutors" />
@@ -107,7 +107,7 @@ const About = () => {
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h3 className="text-2xl font-bold mb-3">Our mission</h3>
+            <h3 className="text-2xl font-bold mb-3">Our <span className='text-primary'>Mission</span></h3>
             <p className="text-gray-700 leading-relaxed">
               We aim to make quality tutoring accessible to all learners by connecting them to verified,
               skilled tutors and providing a simple, secure platform for managing every step of the learning journey.
@@ -115,7 +115,7 @@ const About = () => {
           </div>
 
           <div>
-            <h3 className="text-2xl font-bold mb-3">Our vision</h3>
+            <h3 className="text-2xl font-bold mb-3">Our <span className='text-primary'>Vision</span></h3>
             <p className="text-gray-700 leading-relaxed">
               To become the most trusted tuition marketplace in the region — improving education outcomes by
               empowering tutors and enabling students to find the exact help they need.
@@ -127,7 +127,7 @@ const About = () => {
       {/* Team / Contact CTA */}
       <section id="contact" className="py-12 bg-gradient-to-r from-slate-50 to-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold mb-4">Want to get in touch?</h3>
+          <h3 className="text-2xl font-bold mb-4">Want to get in <span className='text-primary'>touch</span>?</h3>
           <p className="text-gray-600 mb-6">
             For partnership, support, or feedback — contact our team. We reply within 24–48 hours.
           </p>
@@ -159,7 +159,7 @@ const About = () => {
       </section>
 
       <footer className="py-6 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} eTuitionBd — All rights reserved.
+       &copy; e<span className='text-primary'>Tuition</span>Bd — All rights reserved.
       </footer>
     </main>
   );

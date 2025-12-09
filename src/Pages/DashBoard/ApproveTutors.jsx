@@ -65,7 +65,7 @@ const ApproveTutors = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Approve Tutors ({tutors.length})</h2>
+      <h2 className="text-2xl font-semibold mb-4">Approve <span className='text-primary'>Tutors</span> ({tutors.length})</h2>
 
       {/* Desktop / md+ Table */}
       <div className="hidden md:block overflow-x-auto rounded-lg shadow-md">

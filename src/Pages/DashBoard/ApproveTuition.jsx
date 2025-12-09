@@ -121,7 +121,7 @@ const ApproveTuition = () => {
 
   return (
     <div className="p-4 md:p-6">
-      <h2 className="text-3xl font-semibold mb-4">Approve Tuitions</h2>
+      <h2 className="text-3xl font-semibold mb-4">Approve <span className='text-primary'>Tuitions</span></h2>
 
       {tuitions.length === 0 ? (
         <div className="text-center text-gray-600 py-10">

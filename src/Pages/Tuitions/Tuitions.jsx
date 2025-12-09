@@ -76,7 +76,7 @@ const Tuitions = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold text-center mt-6 mb-4">All Tuitions</h1>
+      <h1 className="text-3xl font-bold text-center mt-6 mb-4">All <span className='text-primary'>Tuitions</span></h1>
 
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
@@ -150,7 +150,7 @@ const Tuitions = () => {
                   {role === 'tutor' ? (
                     <button className="btn btn-sm btn-primary" onClick={() => handleApply(t)}>Apply</button>
                   ) : (
-                    <button className="btn btn-sm btn-disabled" title="Only tutors can apply">Apply</button>
+                    <button className="btn btn-sm btn-disabled" title="Only tutors can apply">For Tutors</button>
                   )}
                 </td>
               </tr>
@@ -179,7 +179,8 @@ const Tuitions = () => {
                 {role === 'tutor' ? (
                   <button className="btn btn-sm btn-primary" onClick={() => handleApply(t)}>Apply</button>
                 ) : (
-                  <button className="btn btn-sm btn-disabled">Apply</button>
+                  <button className="btn btn-sm btn-disabled" title="Only tutors can apply">For Tutors</button>
+                  
                 )}
               </div>
             </div>
