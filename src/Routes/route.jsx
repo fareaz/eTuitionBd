@@ -21,6 +21,7 @@ import Error from "../Pages/Error";
 import DashboardHome from "../Pages/DashBoard/DashboardHome/DashboardHome";
 import ProfileSetting from "../Pages/DashBoard/ProfileSetting/ProfileSetting";
 import TuitionsManagement from "../Pages/DashBoard/TuitionsManagement";
+import TutorOngoingTuitions from "../Pages/DashBoard/TutorOngoingTuitions";
 
 export const router = createBrowserRouter([
   {
@@ -73,7 +74,10 @@ export const router = createBrowserRouter([
       {
         path: "tuitions-management",
         element: <TuitionsManagement></TuitionsManagement>,
-      },
+    },{
+      path: "ongoing-tuitions",
+      element: <TutorOngoingTuitions></TutorOngoingTuitions>,
+    },
       {
         path: "my-applications",
         element: <MyApplications></MyApplications>,

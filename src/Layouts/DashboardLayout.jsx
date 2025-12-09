@@ -50,7 +50,7 @@ const DashboardLayout = () => {
               <path d="M14 10l2 2l-2 2"></path>
             </svg>
           </label>
-          <div className="px-4"><h2 className="text-lg font-bold">e<span className='text-primary'>Tuition</span>Bd Dashboard</h2></div>
+          <Link to="/dashboard" className="px-4"><h2 className="text-lg font-bold">e<span className='text-primary'>Tuition</span>Bd Dashboard</h2></Link>
         </nav>
 
         {/* Page content */}
@@ -139,9 +139,9 @@ const DashboardLayout = () => {
                 </li>
 
                 <li>
-                  <NavLink to="/dashboard/tuitions-request" className={sidebarClass} data-tip="Tuitions Request">
+                  <NavLink to="/dashboard/ongoing-tuitions" className={sidebarClass} data-tip="Ongoing Tuitions">
                     <FaCirclePlus />
-                    <span className="is-drawer-close:hidden">Tuitions Request</span>
+                    <span className="is-drawer-close:hidden">Ongoing Tuitions</span>
                   </NavLink>
                 </li>
 

@@ -1,17 +1,11 @@
-// src/pages/tutor/TuitionsManagement.jsx
-import React, { useState } from "react";
+// src/pages/tuition/TuitionsManagement.jsx
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Swal from "sweetalert2";
-import {
-  FiEye,
-  FiCheck,
-  FiX,
-  FiTrash2,
-  FiDollarSign,
-} from "react-icons/fi";
+import { FiEye, FiCheck, FiX, FiTrash2, FiDollarSign } from "react-icons/fi";
 
 const TuitionsManagement = () => {
   const { user } = useAuth();
@@ -21,103 +15,114 @@ const TuitionsManagement = () => {
   const { data: applications = [], isLoading, refetch } = useQuery({
     queryKey: ["applications", user?.email],
     queryFn: async () => {
-      const res = await axiosSecure.get(`/applications?studentEmail=${encodeURIComponent(user.email)}`);
+      const res = await axiosSecure.get(
+        `/applications?studentEmail=${encodeURIComponent(user.email)}`
+      );
       return res.data;
     },
     enabled: !!user?.email,
   });
 
+  // Close modal if currently viewed item becomes rejected/removed
+  useEffect(() => {
+    if (!viewItem) return;
+    const stillExists = applications.find((a) => String(a._id) === String(viewItem._id));
+    if (!stillExists || stillExists.status === "rejected") {
+      setViewItem(null);
+    }
+  }, [applications, viewItem]);
+
   if (isLoading) return <LoadingSpinner />;
 
-  // generic status updater: 'approved' | 'rejected' | 'pending'
-  const updateStatus = async (appId, newStatus) => {
-    const confirm = await Swal.fire({
-      title: `${newStatus === "approved" ? "Approve" : "Reject"} application?`,
-      text: `Are you sure you want to ${newStatus === "approved" ? "approve" : "reject"} this application?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: newStatus === "approved" ? "Yes, approve" : "Yes, reject",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      // PATCH /applications/:id  with { status: 'approved' }
-      const res = await axiosSecure.patch(`/applications/${appId}`, { status: newStatus });
-      const ok = res?.data?.modifiedCount > 0 || res?.data?.acknowledged || res?.data?.success;
-      if (ok) {
-        await refetch();
-        Swal.fire({ icon: "success", title: `Application ${newStatus}`, timer: 1300, showConfirmButton: false });
-      } else {
-        Swal.fire({ icon: "error", title: "Update failed" });
-      }
-    } catch (err) {
-      console.error("Status update error", err);
-      Swal.fire({ icon: "error", title: "Error", text: err?.response?.data?.message || err?.message || "Server error" });
-    }
-  };
-
-  const handleDelete = async (appId) => {
-    const confirm = await Swal.fire({
-      title: "Delete application?",
-      text: "This will remove the application permanently.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const res = await axiosSecure.delete(`/applications/${appId}`);
-      const ok = res?.data?.deletedCount > 0 || res?.data?.acknowledged || res?.data?.success;
-      if (ok) {
-        await refetch();
-        Swal.fire({ icon: "success", title: "Deleted", timer: 1200, showConfirmButton: false });
-      } else {
-        Swal.fire({ icon: "error", title: "Delete failed" });
-      }
-    } catch (err) {
-      console.error("Delete error", err);
-      Swal.fire({ icon: "error", title: "Error", text: err?.response?.data?.message || err?.message || "Server error" });
-    }
-  };
-
-  const handlePay = async (appId) => {
-    const confirm = await Swal.fire({
-      title: "Mark as paid?",
-      text: "You can mark this application as paid. (You can change backend later to integrate real payment.)",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes, mark paid",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      // PATCH /applications/:id/pay  or PATCH /applications/:id with { paid: true }
-      // I'm using PATCH /applications/:id/pay here:
-      const res = await axiosSecure.patch(`/applications/${appId}/pay`, { paid: true });
-      const ok = res?.data?.modifiedCount > 0 || res?.data?.acknowledged || res?.data?.success;
-      if (ok) {
-        await refetch();
-        Swal.fire({ icon: "success", title: "Marked as paid", timer: 1200, showConfirmButton: false });
-      } else {
-        Swal.fire({ icon: "error", title: "Operation failed" });
-      }
-    } catch (err) {
-      console.error("Pay error", err);
-      Swal.fire({ icon: "error", title: "Error", text: err?.response?.data?.message || err?.message || "Server error" });
-    }
-  };
+  // Filter out rejected statuses (client-side)
+  const visibleApplications = Array.isArray(applications)
+    ? applications.filter((a) => String(a.status).toLowerCase() !== "rejected")
+    : [];
 
   const openView = (item) => setViewItem(item);
   const closeView = () => setViewItem(null);
+
+  // APPROVE (Accept) - sets status to 'approved'
+  const handleApprove = async (application) => {
+    const confirm = await Swal.fire({
+      title: "Approve tutor application?",
+      text: `Approve ${application.tutorName} for "${application.subject}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, approve",
+    });
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await axiosSecure.patch(`/applications/${application._id}`, { status: "approved" });
+      const ok =
+        (res?.data && (res.data.modifiedCount > 0 || res.data.acknowledged || res.data.success)) ||
+        Boolean(res?.data);
+      if (ok) {
+        await refetch();
+        Swal.fire({ icon: "success", title: "Approved", timer: 1200, showConfirmButton: false });
+      } else {
+        Swal.fire({ icon: "error", title: "Approve failed" });
+      }
+    } catch (err) {
+      console.error("Approve error", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || err?.message || "Server error",
+      });
+    }
+  };
+
+  // REJECT - sets status to 'rejected'
+  const handleReject = async (application) => {
+    const confirm = await Swal.fire({
+      title: "Reject tutor application?",
+      text: `Reject ${application.tutorName} for "${application.subject}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, reject",
+    });
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await axiosSecure.patch(`/applications/${application._id}`, { status: "rejected" });
+      const ok =
+        (res?.data && (res.data.modifiedCount > 0 || res.data.acknowledged || res.data.success)) ||
+        Boolean(res?.data);
+      if (ok) {
+        await refetch();
+        // view modal will auto-close via useEffect if it was the same item
+        Swal.fire({ icon: "success", title: "Rejected", timer: 1200, showConfirmButton: false });
+      } else {
+        Swal.fire({ icon: "error", title: "Reject failed" });
+      }
+    } catch (err) {
+      console.error("Reject error", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || err?.message || "Server error",
+      });
+    }
+  };
+
+  // PAY placeholder
+  const handlePay = async (application) => {
+    Swal.fire({
+      icon: "info",
+      title: "Payment",
+      text: "Payment integration is not implemented yet. You'll be redirected to checkout when ready.",
+    });
+  };
 
   return (
     <div className="p-4 md:p-6">
       <h2 className="text-2xl font-bold mb-4">Tuitions Management</h2>
       <p className="mb-4">Welcome, {user?.email}! Here are your received applications.</p>
 
-      {applications.length === 0 ? (
-        <p className="text-gray-500">No tutor has applied to your tuitions yet.</p>
+      {visibleApplications.length === 0 ? (
+        <p className="text-gray-500">No tutor applications to show.</p>
       ) : (
         <>
           {/* Desktop table */}
@@ -131,39 +136,35 @@ const TuitionsManagement = () => {
                   <th>Class</th>
                   <th>Status</th>
                   <th>Applied At</th>
-                  <th className="w-48 text-center">Actions</th>
+                  <th className="w-56 text-center">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {applications.map((app, idx) => (
+                {visibleApplications.map((app, idx) => (
                   <tr key={app._id}>
                     <td>{idx + 1}</td>
                     <td>
                       <div className="font-semibold">{app.tutorName}</div>
                       <div className="text-xs text-gray-500">{app.tutorEmail}</div>
+                      <div className="text-xs text-gray-400">{app.tutorQualifications} • {app.tutorExperience}</div>
                     </td>
                     <td>{app.subject}</td>
                     <td>{app.class}</td>
                     <td>
-  <span
-  className={`badge mt-2 ${
-    app.status === "requested"
-      ? "badge-warning badge-outline"
-      : app.status === "paid"
-      ? "badge-info badge-outline"
-      : app.status === "accepted"
-      ? "badge-success"
-      : app.status === "completed"
-      ? "badge-primary"
-      : app.status === "rejected"
-      ? "badge-error"
-      : "badge-neutral"
-  }`}
->
-  {app.status}
-</span>
-
+                      <span
+                        className={`badge mt-2 ${
+                          app.status === "pending"
+                            ? "badge-warning badge-outline"
+                            : app.status === "paid"
+                            ? "badge-info badge-outline"
+                            : app.status === "approved"
+                            ? "badge-success"
+                            : "badge-neutral"
+                        }`}
+                      >
+                        {app.status}
+                      </span>
                       {app.paid && <div className="text-xs text-blue-600 mt-1">Paid</div>}
                     </td>
                     <td className="text-xs text-gray-500">{new Date(app.createdAt).toLocaleString()}</td>
@@ -172,21 +173,21 @@ const TuitionsManagement = () => {
                         <FiEye />
                       </button>
 
-                      <button onClick={() => updateStatus(app._id, "approved")} className="btn btn-ghost btn-sm" title="Accept">
+                      <button onClick={() => handleApprove(app)} className="btn btn-ghost btn-sm" title="Accept">
                         <FiCheck />
                       </button>
 
-                      <button onClick={() => updateStatus(app._id, "rejected")} className="btn btn-ghost btn-sm" title="Reject">
+                      <button onClick={() => handleReject(app)} className="btn btn-ghost btn-sm" title="Reject">
                         <FiX />
                       </button>
 
-                      <button onClick={() => handlePay(app._id)} className="btn btn-ghost btn-sm" title="Mark as Paid">
-                        <FiDollarSign />
-                      </button>
-
-                      <button onClick={() => handleDelete(app._id)} className="btn btn-ghost btn-sm text-red-600" title="Delete">
-                        <FiTrash2 />
-                      </button>
+                      {app.status === "paid" ? (
+                        <span className="text-green-700 text-sm">Paid</span>
+                      ) : (
+                        <button onClick={() => handlePay(app)} className="btn btn-ghost btn-sm" title="Pay">
+                          <FiDollarSign />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -196,7 +197,7 @@ const TuitionsManagement = () => {
 
           {/* Mobile cards */}
           <div className="md:hidden space-y-4">
-            {applications.map((app) => (
+            {visibleApplications.map((app) => (
               <article key={app._id} className="border p-4 rounded-lg shadow bg-white">
                 <div className="flex justify-between items-start">
                   <div>
@@ -206,36 +207,31 @@ const TuitionsManagement = () => {
                     <p className="text-xs text-gray-500">{app.tutorEmail}</p>
                     <p className="mt-2"><span className="font-semibold">Budget:</span> <span className="text-green-600">৳{app.budget}</span></p>
                     <p className="mt-1 text-xs text-gray-500">{new Date(app.createdAt).toLocaleString()}</p>
-   <span
-  className={`badge mt-2 ${
-    app.status === "requested"
-      ? "badge-warning badge-outline"
-      : app.status === "paid"
-      ? "badge-info badge-outline"
-      : app.status === "accepted"
-      ? "badge-success"
-      : app.status === "completed"
-      ? "badge-primary"
-      : app.status === "rejected"
-      ? "badge-error"
-      : "badge-neutral"
-  }`}
->
-  {app.status}
-</span>
 
+                    <span
+                      className={`badge mt-2 ${
+                        app.status === "pending"
+                          ? "badge-warning badge-outline"
+                          : app.status === "paid"
+                          ? "badge-info badge-outline"
+                          : app.status === "approved"
+                          ? "badge-success"
+                          : "badge-neutral"
+                      }`}
+                    >
+                      {app.status}
+                    </span>
                     {app.paid && <div className="text-xs text-blue-600 mt-1">Paid</div>}
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
                       <button onClick={() => openView(app)} className="btn btn-square btn-sm" title="View"><FiEye /></button>
-                      <button onClick={() => updateStatus(app._id, "approved")} className="btn btn-square btn-sm" title="Accept"><FiCheck /></button>
-                      <button onClick={() => updateStatus(app._id, "rejected")} className="btn btn-square btn-sm" title="Reject"><FiX /></button>
+                      <button onClick={() => handleApprove(app)} className="btn btn-square btn-sm" title="Accept"><FiCheck /></button>
+                      <button onClick={() => handleReject(app)} className="btn btn-square btn-sm" title="Reject"><FiX /></button>
                     </div>
                     <div className="flex gap-2 mt-2">
-                      <button onClick={() => handlePay(app._id)} className="btn btn-sm"><FiDollarSign /> Pay</button>
-                      <button onClick={() => handleDelete(app._id)} className="btn btn-sm btn-ghost text-red-600"><FiTrash2 /></button>
+                      <button onClick={() => handlePay(app)} className="btn btn-sm"><FiDollarSign /> Pay</button>
                     </div>
                   </div>
                 </div>
@@ -279,10 +275,9 @@ const TuitionsManagement = () => {
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-              <button onClick={() => updateStatus(viewItem._id, "approved")} className="btn btn-success"><FiCheck /> Accept</button>
-              <button onClick={() => updateStatus(viewItem._id, "rejected")} className="btn btn-error"><FiX /> Reject</button>
-              <button onClick={() => handlePay(viewItem._id)} className="btn btn-primary"><FiDollarSign /> Mark Paid</button>
-              <button onClick={() => handleDelete(viewItem._id)} className="btn btn-ghost text-red-600"><FiTrash2 /> Delete</button>
+              <button onClick={() => handleApprove(viewItem)} className="btn btn-success"><FiCheck /> Accept</button>
+              <button onClick={() => handleReject(viewItem)} className="btn btn-error"><FiX /> Reject</button>
+              <button onClick={() => handlePay(viewItem)} className="btn btn-primary"><FiDollarSign /> Mark Paid</button>
             </div>
           </div>
         </div>

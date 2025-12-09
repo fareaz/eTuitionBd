@@ -76,7 +76,7 @@ const TutorApplyForm = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-black">
 
-        {/* Tutor radio list for STUDENT */}
+       
         {currentRole === 'Student' && (
           <div>
             <label className="label mb-2">Choose Tutor (radio)</label>
@@ -104,7 +104,7 @@ const TutorApplyForm = () => {
           </div>
         )}
 
-        {/* Name */}
+
         <div>
           <label className="label">Name</label>
           <input
@@ -118,7 +118,7 @@ const TutorApplyForm = () => {
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
 
-        {/* Email (defaulted from user, read-only) */}
+      
         <div>
           <label className="label">Email</label>
           <input
@@ -130,7 +130,7 @@ const TutorApplyForm = () => {
           />
         </div>
 
-        {/* Qualifications */}
+   
         <div>
           <label className="label">Qualifications</label>
           <textarea
@@ -167,7 +167,7 @@ const TutorApplyForm = () => {
         </div>
 
         <div className="flex gap-3">
-          <button type="submit" className="btn btn-primary text-black" disabled={isSubmitting}>
+          <button type="submit" className="btn btn-primary " disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : (currentRole === 'Tutor' ? 'Apply as Tutor' : 'Submit Application')}
           </button>
           <button type="button" className="btn btn-ghost" onClick={() => reset()}>
