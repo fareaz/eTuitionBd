@@ -25,6 +25,8 @@ import TutorOngoingTuitions from "../Pages/DashBoard/TutorOngoingTuitions";
 import PaymentHistory from "../Pages/PaymentHistory";
 import PaymentSuccess from "../Pages/PaymentSuccess";
 import PaymentCancelled from "../Pages/PaymentCancelled";
+import RevenueHistory from "../Pages/RevenueHistory";
+import TutorRoute from "./TutorRoute";
 
 export const router = createBrowserRouter([
   {
@@ -63,12 +65,20 @@ export const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element:<PrivateRoute><DashboardLayout /></PrivateRoute> ,
-   
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
+
     children: [
       {
         index: true,
-        Component: DashboardHome
+        Component: DashboardHome,
+      },
+      {
+        path: "my_tuitions",
+        element: <MyTuition></MyTuition>,
       },
       {
         path: "post_tuition",
@@ -76,61 +86,92 @@ export const router = createBrowserRouter([
       },
       {
         path: "payment-success",
-        element: <PaymentSuccess />
+        element: <PaymentSuccess />,
       },
       {
         path: "payment-cancelled",
-        element: <PaymentCancelled />
+        element: <PaymentCancelled />,
       },
-      
+
       {
-        path: 'payment-history',
-        Component: PaymentHistory
+        path: "payment-history",
+        Component: PaymentHistory,
       },
       {
         path: "tuitions-management",
         element: <TuitionsManagement></TuitionsManagement>,
-    },{
-      path: "ongoing-tuitions",
-      element: <TutorOngoingTuitions></TutorOngoingTuitions>,
-    },
+      },
+      
+      //tutor
+
       {
         path: "my-applications",
-        element: <MyApplications></MyApplications>,
+        element: (
+          <TutorRoute>
+            <MyApplications></MyApplications>
+          </TutorRoute>
+        ),
       },
+      {
+        path: "ongoing-tuitions",
+        element: (
+          <TutorRoute>
+            <TutorOngoingTuitions></TutorOngoingTuitions>
+          </TutorRoute>
+        ),
+      },
+
       {
         path: "be-a-tutor",
-        element: <BeATutor></BeATutor>,
+        element: (
+          <TutorRoute>
+            <BeATutor></BeATutor>
+          </TutorRoute>
+        ),
       },
+
       {
-        path: "my_tuitions",
-        element: <MyTuition></MyTuition>,
+        path: "revenue-history",
+        element: (
+          <TutorRoute>
+            <RevenueHistory></RevenueHistory>
+          </TutorRoute>
+        ),
       },
+
+      //admin
       {
         path: "approve-tutors",
-        element: <AdminRoute><ApproveTutors></ApproveTutors></AdminRoute>
-        
+        element: (
+          <AdminRoute>
+            <ApproveTutors></ApproveTutors>
+          </AdminRoute>
+        ),
       },
       {
         path: "approve-tuitions",
-        element: <AdminRoute><ApproveTuition></ApproveTuition></AdminRoute>
-        
+        element: (
+          <AdminRoute>
+            <ApproveTuition></ApproveTuition>
+          </AdminRoute>
+        ),
       },
       {
         path: "users-management",
-        element: <AdminRoute><UsersManagement></UsersManagement></AdminRoute>
-        
+        element: (
+          <AdminRoute>
+            <UsersManagement></UsersManagement>
+          </AdminRoute>
+        ),
       },
       {
         path: "profile-setting",
-        element: <ProfileSetting></ProfileSetting>
-        
+        element: <ProfileSetting></ProfileSetting>,
       },
     ],
   },
   {
     path: "*",
-    element: <Error />
-  }
-  
+    element: <Error />,
+  },
 ]);

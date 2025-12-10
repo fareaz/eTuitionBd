@@ -3,19 +3,11 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
-import { useLoaderData } from 'react-router';
 import Swal from 'sweetalert2';
 
 const TutorApplyForm = () => {
-  const { user } = useAuth(); // user object from your message
+  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-  const loader = useLoaderData() || {};
-  const { post = {}, availableTutors = [] } = loader;
-
-  // Determine role: prefer explicit user.role, fallback to photoURL === 'Tutor'
-  const currentRole = user?.role
-    ? user.role
-    : (user?.photoURL === 'Tutor' ? 'Tutor' : 'Student');
 
   const {
     register,
@@ -24,12 +16,11 @@ const TutorApplyForm = () => {
     formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
-      name: currentRole === 'Tutor' ? (user?.displayName || '') : '',
+      name: user?.displayName || '',
       email: user?.email || '',
       qualifications: '',
       experience: '',
-      expectedSalary: '',
-      selectedTutorEmail: ''
+      expectedSalary: ''
     }
   });
 
@@ -37,8 +28,8 @@ const TutorApplyForm = () => {
     try {
       const payload = {
         role: "tutor",
-        name: currentRole === 'Tutor' ? (user?.displayName || data.name) : data.name,
-        email: user?.email,
+        name: data.name || user?.displayName || '',
+        email: user?.email || data.email || '',
         qualifications: data.qualifications || '',
         experience: data.experience || '',
         expectedSalary: data.expectedSalary || '',
@@ -72,53 +63,21 @@ const TutorApplyForm = () => {
 
   return (
     <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-2xl font-semibold mb-4">Apply for this Tuition</h2>
+      <h2 className="text-2xl font-semibold mb-4">Apply as a Tutor</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-black">
-
-       
-        {currentRole === 'Student' && (
-          <div>
-            <label className="label mb-2">Choose Tutor (radio)</label>
-            {availableTutors.length === 0 ? (
-              <div className="text-sm text-gray-600">No tutors available to choose.</div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {availableTutors.map((tutor, idx) => (
-                  <label key={idx} className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      value={tutor.email}
-                      {...register('selectedTutorEmail')}
-                      className="radio"
-                    />
-                    <span>{tutor.name} — {tutor.email}</span>
-                  </label>
-                ))}
-                <label className="flex items-center gap-2">
-                  <input type="radio" value="" {...register('selectedTutorEmail')} className="radio" />
-                  <span>Not selecting specific tutor</span>
-                </label>
-              </div>
-            )}
-          </div>
-        )}
-
-
         <div>
           <label className="label">Name</label>
           <input
             type="text"
-            {...register('name', { required: currentRole === 'Student' ? 'Name required' : false })}
+            {...register('name', { required: 'Name required' })}
             className="input w-full"
             placeholder="Your name"
-            defaultValue={currentRole === 'Tutor' ? (user?.displayName || '') : ''}
-            readOnly={currentRole === 'Tutor'}
+            defaultValue={user?.displayName || ''}
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
 
-      
         <div>
           <label className="label">Email</label>
           <input
@@ -130,7 +89,6 @@ const TutorApplyForm = () => {
           />
         </div>
 
-   
         <div>
           <label className="label">Qualifications</label>
           <textarea
@@ -142,7 +100,6 @@ const TutorApplyForm = () => {
           {errors.qualifications && <p className="text-red-500 text-sm mt-1">{errors.qualifications.message}</p>}
         </div>
 
-        {/* Experience */}
         <div>
           <label className="label">Experience</label>
           <textarea
@@ -154,7 +111,6 @@ const TutorApplyForm = () => {
           {errors.experience && <p className="text-red-500 text-sm mt-1">{errors.experience.message}</p>}
         </div>
 
-        {/* Expected Salary */}
         <div>
           <label className="label">Expected Salary</label>
           <input
@@ -167,8 +123,8 @@ const TutorApplyForm = () => {
         </div>
 
         <div className="flex gap-3">
-          <button type="submit" className="btn btn-primary " disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : (currentRole === 'Tutor' ? 'Apply as Tutor' : 'Submit Application')}
+          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+            {isSubmitting ? 'Submitting...' : 'Apply as Tutor'}
           </button>
           <button type="button" className="btn btn-ghost" onClick={() => reset()}>
             Reset

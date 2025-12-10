@@ -212,7 +212,7 @@ const TutorOngoingTuitions = () => {
             </div>
           </div>
 
-          {/* ---------- Mobile stacked list ---------- */}
+     
           <div className="sm:hidden space-y-3">
             {applications.map((app, idx) => (
               <div key={app._id} className="p-3 bg-base-100 rounded-lg border shadow">

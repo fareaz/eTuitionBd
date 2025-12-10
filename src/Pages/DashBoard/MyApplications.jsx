@@ -15,7 +15,7 @@ const MyApplications = () => {
   const { data: applications = [], refetch, isLoading } = useQuery({
     queryKey: ['my-applications', user?.email],
     queryFn: async () => {
-      const res = await axiosSecure.get(`/my-tutors?email=${encodeURIComponent(user.email)}`);
+      const res = await axiosSecure.get(`/my-tutors?email=${(user.email)}`);
       return res.data;
     },
     enabled: !!user?.email
@@ -24,7 +24,7 @@ const MyApplications = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  // react-hook-form for edit modal
+ 
   const {
     register,
     handleSubmit,

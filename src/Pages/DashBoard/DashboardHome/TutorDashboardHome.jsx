@@ -39,7 +39,7 @@ const TutorDashboardHome = () => {
     queryKey: ["tutor-profile", user?.email],
     queryFn: () =>
       axiosSecure
-        .get(`/users?searchText=${encodeURIComponent(user.email)}`)
+        .get(`/users?searchText=${(user.email)}`)
         .then((res) => res.data || []),
     enabled: !!user?.email,
   });
@@ -54,7 +54,7 @@ const TutorDashboardHome = () => {
     queryKey: ["my-applications", user?.email],
     queryFn: () =>
       axiosSecure
-        .get(`/my-tutors?email=${encodeURIComponent(user.email)}`)
+        .get(`/my-tutors?email=${(user.email)}`)
         .then((res) => res.data || []),
     enabled: !!user?.email,
   });

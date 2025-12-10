@@ -1,11 +1,18 @@
-// src/pages/Tutors.jsx
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
+import useRole from '../../hooks/useRole';
 
 const Tutors = () => {
   const axiosSecure = useAxiosSecure();
+  const { user } = useAuth();
+    const { role } = useRole();
+  const navigate = useNavigate();
 
   const { data: tutors = [], isLoading } = useQuery({
     queryKey: ['approved-tutors'],
@@ -15,20 +22,96 @@ const Tutors = () => {
     }
   });
 
-  if (isLoading) return<LoadingSpinner></LoadingSpinner>;
-
-  const handleHire = (tutor) => {
-    // open user's email client with prefilled subject/body
-    const subject = encodeURIComponent(`Hiring you as a tutor — ${tutor.name}`);
-    const body = encodeURIComponent(
-      `Hello ${tutor.name},%0A%0AI saw your profile on eTuitionBd and would like to discuss hiring you as a tutor.%0A%0APlease reply with your availability and any further details.%0A%0AThanks,%0A[Your name]`
-    );
-    window.location.href = `mailto:${tutor.email}?subject=${subject}&body=${body}`;
+  const [selectedTutor, setSelectedTutor] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const openModal = (tutor) => {
+    setSelectedTutor(tutor);
+    setModalOpen(true);
   };
+  const closeModal = () => {
+    setSelectedTutor(null);
+    setModalOpen(false);
+  };
+
+
+  //   // if not logged in, redirect to login
+  //   if (!user) {
+  //     navigate('/login');
+  //     return;
+  //   }
+  //   // open modal with tutor details
+  //   openModal(tutor);
+  // };
+  const handleContact = (tutor) => {
+  
+  if (!user) {
+    navigate('/login');
+    return;
+  }
+
+ 
+  if (role !== 'student') {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Access denied!',
+      text: 'Only students can contact or apply to tutors.',
+    });
+    return;
+  }
+
+  // 3️⃣ Open modal if allowed
+  openModal(tutor);
+};
+
+  const handlePay = async (tutor) => {
+    if (!user) {
+      // extra guard — shouldn't happen if modal only opens for logged in users
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const confirm = await Swal.fire({
+        title: 'Proceed to payment?',
+        text: `Pay for ${tutor._id || 'tutor'} (${tutor.name}) — ৳${tutor.expectedSalary || 0}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Pay now',
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      const paymentInfo = {
+        cost: Number(tutor.expectedSalary || 0),
+        paymentId: tutor._id,
+        studentEmail: user.email,
+        tutorEmail: tutor.email,
+        tutorName: tutor.name,
+        // add any other fields your backend expects
+      };
+
+      const res = await axiosSecure.post('/create-checkout-session', paymentInfo);
+
+      if (res?.data?.url) {
+        // redirect browser to checkout url returned by backend
+        window.location.href = res.data.url;
+      } else {
+        console.error('create-checkout-session response:', res);
+        Swal.fire('Error', 'Could not create checkout session — please try again.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error', err?.message || 'Something went wrong', 'error');
+    }
+  };
+
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Approved <span className='text-primary'>Tutors</span> (<span className='text-primary'>{tutors.length}</span>)</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">
+        Approved <span className="text-primary">Tutors</span> (<span className="text-primary">{tutors.length}</span>)
+      </h1>
 
       {/* Desktop / Tablet table */}
       <div className="hidden md:block overflow-x-auto rounded-xl shadow bg-white">
@@ -40,7 +123,7 @@ const Tutors = () => {
               <th>Qualifications</th>
               <th>Experience</th>
               <th>Expected Salary</th>
-              <th className="w-28 text-center">Hire</th>
+              <th className="w-36 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -58,14 +141,16 @@ const Tutors = () => {
                 <td className="align-top">{tutor.qualifications}</td>
                 <td className="align-top">{tutor.experience}</td>
                 <td className="align-top font-medium text-green-600">৳{tutor.expectedSalary}</td>
-                <td className="align-top text-center">
-                  <button
-                    onClick={() => handleHire(tutor)}
-                    className="btn btn-sm btn-primary text-white w-full"
-                    title={`Hire ${tutor.name}`}
-                  >
-                    Hire
-                  </button>
+                <td className="align-top text-center space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => handleContact(tutor)}
+                      className="btn btn-sm btn-outline w-full"
+                      title={`Contact ${tutor.name}`}
+                    >
+                      Contact
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -88,11 +173,12 @@ const Tutors = () => {
 
               <div className="flex flex-col items-end gap-2">
                 <button
-                  onClick={() => handleHire(tutor)}
-                  className="btn btn-sm btn-primary text-white"
+                  onClick={() => handleContact(tutor)}
+                  className="btn btn-sm btn-outline"
                 >
-                  Hire
+                  Contact
                 </button>
+
                 <div className="text-xs text-gray-400">#{i + 1}</div>
               </div>
             </div>
@@ -103,6 +189,34 @@ const Tutors = () => {
           <p className="text-center text-gray-500">No approved tutors found.</p>
         )}
       </div>
+
+      {/* Modal */}
+      {modalOpen && selectedTutor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={closeModal}></div>
+
+          <div className="relative bg-white rounded-lg max-w-lg w-full p-6 z-10">
+            <h2 className="text-xl font-semibold mb-2">Contact {selectedTutor.name}</h2>
+            <p className="text-sm text-gray-600 mb-4">{selectedTutor.email}</p>
+
+            <div className="space-y-2 mb-4">
+              <p><strong>Qualifications:</strong> {selectedTutor.qualifications}</p>
+              <p><strong>Experience:</strong> {selectedTutor.experience}</p>
+              <p><strong>Expected Salary:</strong> ৳{selectedTutor.expectedSalary}</p>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button className="btn btn-ghost" onClick={closeModal}>Close</button>
+              <button
+                className="btn btn-primary"
+                onClick={() => handlePay(selectedTutor)}
+              >
+                Pay ৳{selectedTutor.expectedSalary}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
