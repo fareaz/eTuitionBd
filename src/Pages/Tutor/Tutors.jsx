@@ -73,7 +73,7 @@ const Tutors = () => {
     try {
       const confirm = await Swal.fire({
         title: 'Proceed to payment?',
-        text: `Pay for ${tutor._id || 'tutor'} (${tutor.name}) — ৳${tutor.expectedSalary || 0}`,
+        text: `Pay for  (${tutor.name}) — ৳${tutor.expectedSalary || 0}`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Pay now',

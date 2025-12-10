@@ -1,11 +1,11 @@
-// src/pages/tuition/TuitionsManagement.jsx
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Swal from "sweetalert2";
-import { FiEye, FiCheck, FiX, FiTrash2, FiDollarSign } from "react-icons/fi";
+import { FiEye, FiCheck, FiX, FiDollarSign } from "react-icons/fi";
 
 const TuitionsManagement = () => {
   const { user } = useAuth();
@@ -16,25 +16,28 @@ const TuitionsManagement = () => {
     queryKey: ["applications", user?.email],
     queryFn: async () => {
       const res = await axiosSecure.get(
-        `/applications?studentEmail=${(user.email)}`
+        `/applications?studentEmail=${encodeURIComponent(user.email)}`
       );
-      return res.data;
+      return res.data || [];
     },
     enabled: !!user?.email,
   });
 
-  // Close modal if currently viewed item becomes rejected/removed
+ 
   useEffect(() => {
     if (!viewItem) return;
     const stillExists = applications.find((a) => String(a._id) === String(viewItem._id));
-    if (!stillExists || stillExists.status === "rejected") {
+    if (!stillExists || String(stillExists.status).toLowerCase() === "rejected") {
       setViewItem(null);
+    } else {
+      
+      setViewItem(stillExists);
     }
   }, [applications, viewItem]);
 
   if (isLoading) return <LoadingSpinner />;
 
-  // Filter out rejected statuses (client-side)
+
   const visibleApplications = Array.isArray(applications)
     ? applications.filter((a) => String(a.status).toLowerCase() !== "rejected")
     : [];
@@ -42,8 +45,22 @@ const TuitionsManagement = () => {
   const openView = (item) => setViewItem(item);
   const closeView = () => setViewItem(null);
 
-  // APPROVE (Accept) - sets status to 'approved'
+
+  const isFinalized = (status) => {
+    const s = String(status || "").toLowerCase();
+    return s === "paid" || s === "confirmed";
+  };
+
+  
+ 
+
+
   const handleApprove = async (application) => {
+    if (isFinalized(application.status)) {
+      Swal.fire({ icon: "info", title: "Already finalized", text: "This application is already paid/confirmed." });
+      return;
+    }
+
     const confirm = await Swal.fire({
       title: "Approve tutor application?",
       text: `Approve ${application.tutorName} for "${application.subject}"?`,
@@ -74,8 +91,12 @@ const TuitionsManagement = () => {
     }
   };
 
-  // REJECT - sets status to 'rejected'
   const handleReject = async (application) => {
+    if (isFinalized(application.status)) {
+      Swal.fire({ icon: "info", title: "Already finalized", text: "Cannot reject a paid/confirmed application." });
+      return;
+    }
+
     const confirm = await Swal.fire({
       title: "Reject tutor application?",
       text: `Reject ${application.tutorName} for "${application.subject}"?`,
@@ -92,7 +113,6 @@ const TuitionsManagement = () => {
         Boolean(res?.data);
       if (ok) {
         await refetch();
-        // view modal will auto-close via useEffect if it was the same item
         Swal.fire({ icon: "success", title: "Rejected", timer: 1200, showConfirmButton: false });
       } else {
         Swal.fire({ icon: "error", title: "Reject failed" });
@@ -107,37 +127,58 @@ const TuitionsManagement = () => {
     }
   };
 
- 
-const handlePay = async (application) => {
-    console.log("Proceed to payment for application:", application);
+  const handlePay = async (application) => {
+    if (isFinalized(application.status)) {
+      Swal.fire({ icon: "info", title: "Already finalized", text: "This application is already paid/confirmed." });
+      return;
+    }
 
     const confirm = await Swal.fire({
       title: "Proceed to payment?",
-      text: `Pay for ${application._id} (${application.class}) — ৳${application.budget}`,
+      text: `Pay for(${application.class}) — ৳${application.budget}`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Pay now",
     });
     if (!confirm.isConfirmed) return;
-    const paymentInfo = {
-            cost: application.budget,
-            paymentId: application._id,
-            studentEmail: application.studentEmail,
-            tutorEmail: application.tutorEmail
-        }
 
-        const res = await axiosSecure.post('/create-checkout-session', paymentInfo);
+    try {
+      const paymentInfo = {
+        cost: application.budget,
+        paymentId: application._id,
+        studentEmail: application.studentEmail,
+        tutorEmail: application.tutorEmail,
+      };
 
-        console.log(res.data);
-        
+      const res = await axiosSecure.post("/create-checkout-session", paymentInfo);
+
+      if (res?.data?.url) {
         window.location.href = res.data.url;
+      } else {
+        Swal.fire({ icon: "error", title: "Payment error", text: "Payment session creation failed." });
+      }
+    } catch (err) {
+      console.error("Payment error", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.response?.data?.message || err?.message || "Server error",
+      });
     }
+  };
 
+  const formatDate = (iso) => {
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso || "-";
+    }
+  };
 
   return (
     <div className="p-4 md:p-6">
-      <h2 className="text-2xl font-bold mb-4">Tuitions Management</h2>
-      <p className="mb-4">Welcome, {user?.email}! Here are your received applications.</p>
+      <h2 className="text-2xl font-bold mb-4">Tuitions <span className="text-primary">Management</span></h2>
+     
 
       {visibleApplications.length === 0 ? (
         <p className="text-gray-500">No tutor applications to show.</p>
@@ -159,102 +200,130 @@ const handlePay = async (application) => {
               </thead>
 
               <tbody>
-                {visibleApplications.map((app, idx) => (
-                  <tr key={app._id}>
-                    <td>{idx + 1}</td>
-                    <td>
-                      <div className="font-semibold">{app.tutorName}</div>
-                      <div className="text-xs text-gray-500">{app.tutorEmail}</div>
-                      <div className="text-xs text-gray-400">{app.tutorQualifications} • {app.tutorExperience}</div>
-                    </td>
-                    <td>{app.subject}</td>
-                    <td>{app.class}</td>
-                    <td>
-                      <span
-                        className={`badge mt-2 ${
-                          app.status === "pending"
-                            ? "badge-warning badge-outline"
-                            : app.status === "paid"
-                            ? "badge-info badge-outline"
-                            : app.status === "approved"
-                            ? "badge-success"
-                            : "badge-neutral"
-                        }`}
-                      >
-                        {app.status}
-                      </span>
-                      {app.paid && <div className="text-xs text-blue-600 mt-1">Paid</div>}
-                    </td>
-                    <td className="text-xs text-gray-500">{new Date(app.createdAt).toLocaleString()}</td>
-                    <td className="flex items-center gap-2 justify-center">
-                      <button onClick={() => openView(app)} className="btn btn-ghost btn-sm" title="View">
-                        <FiEye />
-                      </button>
+                {visibleApplications.map((app, idx) => {
+                  const finalized = isFinalized(app.status);
+                 
+                  return (
+                    <tr key={app._id}>
+                      <td>{idx + 1}</td>
+                      <td>
+                        <div className="font-semibold">{app.tutorName}</div>
+                        <div className="text-xs text-gray-500">{app.tutorEmail}</div>
+                        <div className="text-xs text-gray-400">{app.tutorQualifications} • {app.tutorExperience}</div>
+                      </td>
+                      <td>{app.subject}</td>
+                      <td>{app.class}</td>
+                      <td>
+                        <span
+                          className={`badge mt-2 ${
+                            String(app.status).toLowerCase() === "pending"
+                              ? "badge-warning badge-outline"
+                              : String(app.status).toLowerCase() === "paid"
+                              ? "badge-info badge-outline"
+                              : String(app.status).toLowerCase() === "approved"
+                              ? "badge-success"
+                              : "badge-neutral"
+                          }`}
+                        >
+                          {app.status}
+                        </span>
+                      
+                      </td>
+                      <td className="text-xs text-gray-500">{formatDate(app.createdAt)}</td>
+                      <td className="flex items-center gap-2 justify-center">
+                       
+                     
+                          <button onClick={() => openView(app)} className="btn btn-ghost btn-sm" title="View">
+                            <FiEye />
+                          </button>
+                     
+                       
+                        {!finalized && (
+                          <>
+                            <button onClick={() => handleApprove(app)} className="btn btn-ghost btn-sm" title="Accept">
+                              <FiCheck />
+                            </button>
 
-                      <button onClick={() => handleApprove(app)} className="btn btn-ghost btn-sm" title="Accept">
-                        <FiCheck />
-                      </button>
+                            <button onClick={() => handleReject(app)} className="btn btn-ghost btn-sm" title="Reject">
+                              <FiX />
+                            </button>
+                          </>
+                        )}
 
-                      <button onClick={() => handleReject(app)} className="btn btn-ghost btn-sm" title="Reject">
-                        <FiX />
-                      </button>
-
-                      {app.status === "paid" ? (
-                        <span className="text-green-700 text-sm">Paid</span>
-                      ) : (
-                        <button onClick={() => handlePay(app)} className="btn btn-ghost btn-sm" title="Pay">
-                          <FiDollarSign />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      
+                        {finalized ? (
+                          <span className="text-green-700 text-sm">Paid / Confirmed</span>
+                        ) : (
+                          <button onClick={() => handlePay(app)} className="btn btn-ghost btn-sm" title="Pay">
+                            <FiDollarSign />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           {/* Mobile cards */}
           <div className="md:hidden space-y-4">
-            {visibleApplications.map((app) => (
-              <article key={app._id} className="border p-4 rounded-lg shadow bg-white">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold">{app.subject}</h3>
-                    <p className="text-sm text-gray-600">Class: {app.class} • {app.location}</p>
-                    <p className="mt-2"><span className="font-semibold">Tutor:</span> {app.tutorName}</p>
-                    <p className="text-xs text-gray-500">{app.tutorEmail}</p>
-                    <p className="mt-2"><span className="font-semibold">Budget:</span> <span className="text-green-600">৳{app.budget}</span></p>
-                    <p className="mt-1 text-xs text-gray-500">{new Date(app.createdAt).toLocaleString()}</p>
+            {visibleApplications.map((app) => {
+              const finalized = isFinalized(app.status);
+              
+              return (
+                <article key={app._id} className="border p-4 rounded-lg shadow bg-white">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold">{app.subject}</h3>
+                      <p className="text-sm text-gray-600">Class: {app.class} • {app.location}</p>
+                      <p className="mt-2"><span className="font-semibold">Tutor:</span> {app.tutorName}</p>
+                      <p className="text-xs text-gray-500">{app.tutorEmail}</p>
+                      <p className="mt-2"><span className="font-semibold">Budget:</span> <span className="text-green-600">৳{app.budget}</span></p>
+                      <p className="mt-1 text-xs text-gray-500">{formatDate(app.createdAt)}</p>
 
-                    <span
-                      className={`badge mt-2 ${
-                        app.status === "pending"
-                          ? "badge-warning badge-outline"
-                          : app.status === "paid"
-                          ? "badge-info badge-outline"
-                          : app.status === "approved"
-                          ? "badge-success"
-                          : "badge-neutral"
-                      }`}
-                    >
-                      {app.status}
-                    </span>
-                    {app.paid && <div className="text-xs text-blue-600 mt-1">Paid</div>}
-                  </div>
+                      <span
+                        className={`badge mt-2 ${
+                          String(app.status).toLowerCase() === "pending"
+                            ? "badge-warning badge-outline"
+                            : String(app.status).toLowerCase() === "paid"
+                            ? "badge-info badge-outline"
+                            : String(app.status).toLowerCase() === "approved"
+                            ? "badge-success"
+                            : "badge-neutral"
+                        }`}
+                      >
+                        {app.status}
+                      </span>
+                    
+                    </div>
 
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="flex gap-2">
-                      <button onClick={() => openView(app)} className="btn btn-square btn-sm" title="View"><FiEye /></button>
-                      <button onClick={() => handleApprove(app)} className="btn btn-square btn-sm" title="Accept"><FiCheck /></button>
-                      <button onClick={() => handleReject(app)} className="btn btn-square btn-sm" title="Reject"><FiX /></button>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <button onClick={() => handlePay(app)} className="btn btn-sm"><FiDollarSign /> Pay</button>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="flex gap-2">
+                      
+                          <button onClick={() => openView(app)} className="btn btn-square btn-sm" title="View"><FiEye /></button>
+                        
+
+                        {!finalized && (
+                          <>
+                            <button onClick={() => handleApprove(app)} className="btn btn-square btn-sm" title="Accept"><FiCheck /></button>
+                            <button onClick={() => handleReject(app)} className="btn btn-square btn-sm" title="Reject"><FiX /></button>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
+                        {finalized ? (
+                          <button className="btn btn-sm btn-disabled" disabled>Paid / Confirmed</button>
+                        ) : (
+                          <button onClick={() => handlePay(app)} className="btn btn-sm"><FiDollarSign /> Pay</button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </>
       )}
@@ -293,9 +362,19 @@ const handlePay = async (application) => {
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-              <button onClick={() => handleApprove(viewItem)} className="btn btn-success"><FiCheck /> Accept</button>
-              <button onClick={() => handleReject(viewItem)} className="btn btn-error"><FiX /> Reject</button>
-              <button onClick={() => handlePay(viewItem)} className="btn btn-primary"><FiDollarSign /> Mark Paid</button>
+           
+              {!isFinalized(viewItem.status) && (
+                <>
+                  <button onClick={() => handleApprove(viewItem)} className="btn btn-success"><FiCheck /> Accept</button>
+                  <button onClick={() => handleReject(viewItem)} className="btn btn-error"><FiX /> Reject</button>
+                </>
+              )}
+
+              {isFinalized(viewItem.status) ? (
+                <button className="btn btn-primary btn-disabled" disabled><FiDollarSign /> Paid / Confirmed</button>
+              ) : (
+                <button onClick={() => handlePay(viewItem)} className="btn btn-primary"><FiDollarSign /> Mark Paid</button>
+              )}
             </div>
           </div>
         </div>

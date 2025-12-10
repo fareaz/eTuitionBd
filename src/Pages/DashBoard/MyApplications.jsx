@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { useForm } from 'react-hook-form';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const MyApplications = () => {
   const { user } = useAuth();
@@ -125,7 +126,7 @@ const MyApplications = () => {
     }
   };
 
-  if (isLoading) return <div className="p-6 text-center">Loading your applications...</div>;
+  if (isLoading) return <LoadingSpinner></LoadingSpinner>
 
   return (
     <div className="p-4 md:p-6">

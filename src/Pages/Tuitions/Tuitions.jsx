@@ -1,8 +1,7 @@
-// src/pages/Tuitions.jsx
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import useRole from '../../hooks/useRole';
 import Swal from "sweetalert2";
 
@@ -10,7 +9,7 @@ const PAGE_SIZES = [5, 10, 20, 50];
 
 const Tuitions = () => {
   const axiosSecure = useAxiosSecure();
-  const { role, roleLoading } = useRole();
+  const { role } = useRole();
 
 
   const [page, setPage] = useState(1);
@@ -35,7 +34,7 @@ const Tuitions = () => {
   };
 
 
-  const { data, isLoading,  isFetching } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ['approved-tuitions', page, limit, debouncedSearch, sortOption],
     queryFn: fetchTuitions,
     keepPreviousData: true,
@@ -47,7 +46,6 @@ const Tuitions = () => {
   const tuitions = data?.results || [];
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  // reset page to 1 when controls change (hook always declared)
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, limit, sortOption]);
@@ -64,7 +62,7 @@ const Tuitions = () => {
   }, [page, totalPages]);
 
 
- // inside Tuitions.jsx (replace handleApply)
+ 
 
 
 const handleApply = async (tuition) => {
@@ -78,7 +76,7 @@ const handleApply = async (tuition) => {
     return;
   }
 
-  // SweetAlert confirmation
+
   const confirm = await Swal.fire({
     title: "Apply for this tuition?",
     text: `Subject: ${tuition.subject}\nLocation: ${tuition.location}`,
@@ -89,7 +87,7 @@ const handleApply = async (tuition) => {
     confirmButtonText: "Yes, Apply!",
   });
 
-  if (!confirm.isConfirmed) return; // user cancelled
+  if (!confirm.isConfirmed) return; 
 
   try {
     const payload = { tuitionId: tuition._id };
@@ -103,8 +101,7 @@ const handleApply = async (tuition) => {
         timer: 1500,
         showConfirmButton: false,
       });
-      // optional: refetch
-      // refetchTuitions();
+     
     } else {
       Swal.fire({
         icon: "success",
@@ -144,8 +141,6 @@ const handleApply = async (tuition) => {
 
 
 
-  if (isLoading || roleLoading) return <LoadingSpinner />;
-
 
 
 
@@ -153,7 +148,7 @@ const handleApply = async (tuition) => {
     <div className="max-w-7xl mx-auto p-4 md:p-6">
       <h1 className="text-3xl font-bold text-center mt-6 mb-4">All <span className='text-primary'>Tuitions</span></h1>
 
-      {/* Controls */}
+     
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
         <div className="flex-1 md:mr-4">
           <div className="relative">
@@ -197,7 +192,7 @@ const handleApply = async (tuition) => {
         <div><span>Page {page} / {totalPages}</span></div>
       </div>
 
-      {/* Table (desktop) */}
+  
       <div className="hidden md:block overflow-x-auto rounded-xl shadow-lg bg-white">
         <table className="table w-full">
           <thead className="bg-gray-100 text-gray-700 text-sm">
@@ -238,7 +233,6 @@ const handleApply = async (tuition) => {
         </table>
       </div>
 
-      {/* Cards (mobile) */}
       <div className="md:hidden space-y-4">
         {tuitions.map((t, idx) => (
           <article key={t._id || idx} className="bg-white rounded-lg shadow-sm border p-4">
@@ -265,7 +259,7 @@ const handleApply = async (tuition) => {
         {tuitions.length === 0 && <div className="text-center text-gray-500 py-6">No tuitions found.</div>}
       </div>
 
-      {/* Pagination controls */}
+     
       <div className="flex items-center justify-center gap-2 mt-6 flex-wrap">
         <button className="btn btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>‹ Prev</button>
         {pagesToShow.map(pn => (

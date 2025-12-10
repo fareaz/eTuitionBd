@@ -1,13 +1,13 @@
-// src/pages/tuition/MyTuition.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FiEdit } from 'react-icons/fi';
 import { FaTrashAlt } from 'react-icons/fa';
-import { Link } from 'react-router';
 import Swal from 'sweetalert2';
 import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { useForm } from 'react-hook-form';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const MyTuition = () => {
   const { user } = useAuth();
@@ -17,16 +17,15 @@ const MyTuition = () => {
     queryKey: ['my-tuitions', user?.email],
     queryFn: async () => {
       const res = await axiosSecure.get(`/my-tuitions?email=${(user.email)}`);
-      return res.data;
+      return res.data || [];
     },
     enabled: !!user?.email
   });
 
-  
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  // react-hook-form for edit form
+  
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
       subject: '',
@@ -38,7 +37,7 @@ const MyTuition = () => {
 
   useEffect(() => {
     if (selected) {
-      // populate form
+     
       reset({
         subject: selected.subject || '',
         class: selected.class || '',
@@ -78,6 +77,7 @@ const MyTuition = () => {
       if (result.isConfirmed) {
         axiosSecure.delete(`/tuitions/${id}`)
           .then(res => {
+         
             if (res.data.deletedCount || res.data.acknowledged) {
               refetch();
               Swal.fire({
@@ -107,10 +107,21 @@ const MyTuition = () => {
     }
   };
 
+  
+  const getStatusBadge = (status) => {
+    const s = String(status || 'pending').toLowerCase();
+    const map = {
+      approved: 'bg-green-100 text-green-700 border border-green-300',
+      pending: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+      rejected: 'bg-red-100 text-red-700 border border-red-300',
+      requested: 'bg-blue-100 text-blue-800 border border-blue-300',
+    };
+    return map[s] || map['pending'];
+  };
+
   const onEditSubmit = async (data) => {
     if (!selected?._id) return;
     try {
-     
       const payload = {
         subject: data.subject,
         class: data.class,
@@ -119,7 +130,10 @@ const MyTuition = () => {
       };
 
       const res = await axiosSecure.patch(`/tuitions/${selected._id}`, payload);
-      if (res.data && (res.data.modifiedCount || res.data.success)) {
+     
+      const success =
+        (res.data && (res.data.modifiedCount > 0 || res.data.success || res.data.acknowledged));
+      if (success) {
         await refetch();
         closeEditModal();
         Swal.fire({
@@ -139,12 +153,12 @@ const MyTuition = () => {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-center">Loading your tuitions...</div>;
+    return <LoadingSpinner></LoadingSpinner>
   }
 
   return (
     <div className="p-4 md:p-6">
-      <h2 className="text-2xl font-semibold mb-4">My Tuitions: {tuitions.length}</h2>
+      <h2 className="text-2xl font-semibold mb-4">My <span className='text-primary'>Tuitions</span>: {tuitions.length}</h2>
 
       {/* Desktop / Tablet: Table */}
       <div className="hidden md:block overflow-x-auto">
@@ -170,21 +184,16 @@ const MyTuition = () => {
                 <td>{t.location}</td>
                 <td className="text-green-600 font-semibold">৳{t.budget}</td>
                 <td className="text-sm text-gray-500">{formatDate(t.createdAt)}</td>
-                 <td>
+                <td>
                   <span
-                    className={`badge badge-lg px-4 py-2 ${
-                      t.status === 'Approved'
-                        ? 'bg-green-100 text-green-700 border border-green-300'
-                        : t.status === 'Rejected'
-                        ? 'bg-red-100 text-red-700 border border-red-300'
-                        : 'bg-gray-100 text-gray-700 border border-gray-300'
-                    }`}
+                    className={`badge badge-lg px-4 py-2 ${getStatusBadge(t.status)}`}
                   >
                     {t.status || 'Pending'}
                   </span>
                 </td>
                 <td className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => openEditModal(t)}
                     className="btn btn-square"
                     title="Edit"
@@ -193,6 +202,7 @@ const MyTuition = () => {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => handleTuitionDelete(t._id)}
                     className="btn btn-square"
                     title="Delete"
@@ -205,7 +215,7 @@ const MyTuition = () => {
 
             {tuitions.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center py-6 text-gray-600">You have no tuition posts yet.</td>
+                <td colSpan={8} className="text-center py-6 text-gray-600">You have no tuition posts yet.</td>
               </tr>
             )}
           </tbody>
@@ -217,19 +227,38 @@ const MyTuition = () => {
         {tuitions.map((t) => (
           <article key={t._id} className="bg-white border rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold">{t.subject}</h3>
-                <p className="text-sm text-gray-600">{t.class} • {t.location}</p>
-                <p className="mt-2 text-sm text-gray-700">Budget: <span className="font-semibold text-green-600">৳{t.budget}</span></p>
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold truncate">{t.subject}</h3>
+                <p className="text-sm text-gray-600 truncate">
+                  {t.class} • {t.location}
+                </p>
+
+                <p className="mt-2 text-sm text-gray-700">
+                  Budget: <span className="font-semibold text-green-600">৳{t.budget}</span>
+                </p>
+
                 <p className="mt-1 text-xs text-gray-400">{formatDate(t.createdAt)}</p>
+
+                <div className="mt-2">
+                  <span className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${getStatusBadge(t.status)}`}>
+                    {t.status || "Pending"}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-col items-end gap-2 ml-3">
                 <div className="flex gap-2">
-                  <button onClick={() => openEditModal(t)} className="btn btn-square" title="Edit">
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(t)}
+                    className="btn btn-square"
+                    title="Edit"
+                  >
                     <FiEdit />
                   </button>
+
                   <button
+                    type="button"
                     onClick={() => handleTuitionDelete(t._id)}
                     className="btn btn-square"
                     title="Delete"

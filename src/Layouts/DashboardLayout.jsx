@@ -19,12 +19,12 @@ const DashboardLayout = () => {
   const sidebarClass = ({ isActive }) =>
     `is-drawer-close:tooltip is-drawer-close:tooltip-right flex items-center gap-3 w-full transition px-4 py-3 ${
       isActive
-        ? 'text-primary border-l-4 border-primary bg-base-100 pl-3' // active: left border + primary text
+        ? 'text-primary border-l-4 border-primary bg-base-100 pl-3' 
         : 'text-base-content hover:bg-base-200'
     }`;
 
   return (
-    <div className="drawer lg:drawer-open max-w-7xl mx-auto border">
+    <div className="drawer lg:drawer-open max-w-7xl mx-auto ">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
         {/* Navbar */}
@@ -180,7 +180,7 @@ const DashboardLayout = () => {
               </>
             )}
 
-            {/* Common: Profile Settings */}
+          
             <li>
               <NavLink to="/dashboard/profile-setting" className={sidebarClass} data-tip="Profile Settings">
                 <svg
