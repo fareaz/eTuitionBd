@@ -22,6 +22,9 @@ import DashboardHome from "../Pages/DashBoard/DashboardHome/DashboardHome";
 import ProfileSetting from "../Pages/DashBoard/ProfileSetting/ProfileSetting";
 import TuitionsManagement from "../Pages/DashBoard/TuitionsManagement";
 import TutorOngoingTuitions from "../Pages/DashBoard/TutorOngoingTuitions";
+import PaymentHistory from "../Pages/PaymentHistory";
+import PaymentSuccess from "../Pages/PaymentSuccess";
+import PaymentCancelled from "../Pages/PaymentCancelled";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +73,19 @@ export const router = createBrowserRouter([
       {
         path: "post_tuition",
         element: <PostTuition />,
+      },
+      {
+        path: "payment-success",
+        element: <PaymentSuccess />
+      },
+      {
+        path: "payment-cancelled",
+        element: <PaymentCancelled />
+      },
+      
+      {
+        path: 'payment-history',
+        Component: PaymentHistory
       },
       {
         path: "tuitions-management",

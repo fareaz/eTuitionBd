@@ -29,7 +29,7 @@ const Tuitions = () => {
   const fetchTuitions = async ({ queryKey }) => {
     const [_key, _page, _limit, _search, _sort] = queryKey;
     const res = await axiosSecure.get(
-      `/approved-tuitions?page=${_page}&limit=${_limit}&search=${encodeURIComponent(_search)}&sort=${_sort}`
+      `/approved-tuitions?page=${_page}&limit=${_limit}&search=${(_search)}&sort=${_sort}`
     );
     return res.data; 
   };

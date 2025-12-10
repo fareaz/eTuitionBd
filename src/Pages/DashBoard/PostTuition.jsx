@@ -7,19 +7,21 @@ import useAxiosSecure from '../../hooks/useAxiosSecure'
 import useAuth from '../../hooks/useAuth'
 
 const PostTuition = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
+  const { register, handleSubmit, formState: { errors, isSubmitting },reset } = useForm()
   const { user } = useAuth()
   const axiosSecure = useAxiosSecure()
-  const navigate = useNavigate()
+  
 
   const onSubmit = async (data) => {
   
     const payload = {
+      name: user?.displayName || 'Anonymous',
       subject: String(data.subject || '').trim(),
       class: String(data.classLevel || '').trim(), 
       location: String(data.location || '').trim(),
       budget: Number(data.budget || 0),
       createdBy: user?.email || null,
+      createdAt: new Date(),
     }
 
   
@@ -44,7 +46,6 @@ const PostTuition = () => {
 
     try {
       const res = await axiosSecure.post('/tuitions', payload)
-      // expect backend to return { insertedId: ... } or similar
       if (res?.data?.insertedId) {
         Swal.fire({
           icon: 'success',
@@ -62,7 +63,7 @@ const PostTuition = () => {
           text: 'Tuition posted.',
         })
       }
-      navigate('/my_tuitions')
+      reset()
     } catch (err) {
       console.error('Post tuition error:', err)
       Swal.fire({

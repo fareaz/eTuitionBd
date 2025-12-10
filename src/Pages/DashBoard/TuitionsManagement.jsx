@@ -16,7 +16,7 @@ const TuitionsManagement = () => {
     queryKey: ["applications", user?.email],
     queryFn: async () => {
       const res = await axiosSecure.get(
-        `/applications?studentEmail=${encodeURIComponent(user.email)}`
+        `/applications?studentEmail=${(user.email)}`
       );
       return res.data;
     },
@@ -107,14 +107,32 @@ const TuitionsManagement = () => {
     }
   };
 
-  // PAY placeholder
-  const handlePay = async (application) => {
-    Swal.fire({
-      icon: "info",
-      title: "Payment",
-      text: "Payment integration is not implemented yet. You'll be redirected to checkout when ready.",
+ 
+const handlePay = async (application) => {
+    console.log("Proceed to payment for application:", application);
+
+    const confirm = await Swal.fire({
+      title: "Proceed to payment?",
+      text: `Pay for ${application._id} (${application.class}) — ৳${application.budget}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Pay now",
     });
-  };
+    if (!confirm.isConfirmed) return;
+    const paymentInfo = {
+            cost: application.budget,
+            paymentId: application._id,
+            studentEmail: application.studentEmail,
+            tutorEmail: application.tutorEmail
+        }
+
+        const res = await axiosSecure.post('/create-checkout-session', paymentInfo);
+
+        console.log(res.data);
+        
+        window.location.href = res.data.url;
+    }
+
 
   return (
     <div className="p-4 md:p-6">

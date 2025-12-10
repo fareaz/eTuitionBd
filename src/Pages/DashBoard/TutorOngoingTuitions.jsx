@@ -181,13 +181,18 @@ const TutorOngoingTuitions = () => {
 
                       <td className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleDelete(app)}
-                            className="btn btn-error btn-sm text-white"
-                            title="Delete"
-                          >
-                            <FiTrash2 />
-                          </button>
+
+                          {String(app.status).toLowerCase() !== "paid" && (
+  <button
+    onClick={() => handleDelete(app)}
+    className="btn btn-error btn-sm text-white"
+    title="Delete"
+  >
+    <FiTrash2 />
+  </button>
+)}
+
+
 
                           {String(app.status).toLowerCase() === "paid" && (
                             <button
@@ -234,12 +239,16 @@ const TutorOngoingTuitions = () => {
                 </div>
 
                 <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => handleDelete(app)}
-                    className="btn btn-error btn-sm text-white flex-1"
-                  >
-                    <FiTrash2 /> Delete
-                  </button>
+                  {String(app.status).toLowerCase() !== "paid" && (
+  <button
+    onClick={() => handleDelete(app)}
+    className="btn btn-error btn-sm text-white"
+    title="Delete"
+  >
+    <FiTrash2 />
+  </button>
+)}
+
 
                   {String(app.status).toLowerCase() === "paid" && (
                     <button
