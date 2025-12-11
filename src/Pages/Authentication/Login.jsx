@@ -29,7 +29,7 @@ const Login = () => {
   const saveOrUpdateUser = async userObj => {
     try {
       const res = await axiosSecure.post('/users', userObj)
-      console.log('saveOrUpdateUser (login) response:', res?.data)
+      // console.log('saveOrUpdateUser (login) response:', res?.data)
       return res?.data
     } catch (err) {
       console.error('saveOrUpdateUser error (login):', err?.response?.data || err.message)
@@ -69,7 +69,7 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithGoogle()
-      console.log('Google sign-in user:', result.user)
+      // console.log('Google sign-in user:', result.user)
 
       const userInfo = {
         email: result.user?.email || '',
@@ -84,7 +84,6 @@ const Login = () => {
       navigate(from, { replace: true })
     } catch (error) {
       console.error('Google sign-in error:', error)
-      // reset form on invalid-credential as requested
       if (handleFirebaseInvalidCredential(error, reset)) return
       toast.error('Google sign-in failed')
     }

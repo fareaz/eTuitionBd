@@ -31,12 +31,12 @@ const Register = () => {
   const saveOrUpdateUser = async userObj => {
     try {
       const res = await axiosSecure.post('/users', userObj)
-      // optional: you can inspect res.data
-      console.log('saveOrUpdateUser:', res.data)
+      
+      // console.log('saveOrUpdateUser:', res.data)
       return res.data
     } catch (err) {
       console.error('saveOrUpdateUser error:', err?.response?.data || err.message)
-      // don't block signup if saving fails; but notify developer/console
+  
       return null
     }
   }
@@ -73,7 +73,7 @@ const Register = () => {
   const handleGoogleSignIn = () => {
     signInWithGoogle()
       .then(async result => {
-        console.log('Google sign-in user:', result.user)
+        // console.log('Google sign-in user:', result.user)
 
         // Prepare the user object (no photoURL, no uid)
         const userInfo = {

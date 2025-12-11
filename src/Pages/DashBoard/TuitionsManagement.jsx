@@ -18,9 +18,9 @@ const TuitionsManagement = () => {
   const { data: rawResp, isLoading, refetch, } = useQuery({
     queryKey: ["applications", "student", user?.email],
     queryFn: async () => {
-      console.debug("[TuitionsManagement] fetching applications for studentEmail:", studentEmailParam);
+      
       const res = await axiosSecure.get(`/applications?studentEmail=${studentEmailParam}`);
-      console.debug("[TuitionsManagement] raw response:", res?.data);
+     
       return res.data;
     },
     enabled: !!user?.email,

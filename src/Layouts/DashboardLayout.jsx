@@ -14,7 +14,7 @@ import useRole from '../hooks/useRole';
 const DashboardLayout = () => {
   const { role } = useRole();
   const normalizedRole = role;
-  console.log(normalizedRole)
+  // console.log(normalizedRole)
 
 
   const sidebarClass = ({ isActive }) =>

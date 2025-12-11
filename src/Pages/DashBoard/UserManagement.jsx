@@ -15,7 +15,7 @@ const UsersManagement = () => {
     queryKey: ['users', searchText],
     queryFn: async () => {
       const res = await axiosSecure.get(`/users?searchText=${(searchText)}`);
-      console.log(res.data)
+      // console.log(res.data)
       return res.data;
     },
     keepPreviousData: true,
@@ -81,7 +81,7 @@ const UsersManagement = () => {
     
     try {
       const res = await axiosSecure.patch(`/users/${user._id}/role`, roleInfo);
-      console.log(res.data)
+      // console.log(res.data)
       if (res.data.modifiedCount) {
         await refetch();
         Swal.fire({ position: "top-end", icon: "success", title: `${user.displayName || user.email} removed from Admin`, showConfirmButton: false, timer: 2000 });
