@@ -73,7 +73,7 @@ const TutorDashboardHome = () => {
         transition={{ duration: 0.45 }}
         className="text-3xl font-bold text-center mb-10"
       > <span className="text-primary">
-        {profile?.name?.split(" ")[0] || "Tutor"} </span>Dashboard
+        {profile?.name?.split(" ")[0] || "Tutor"} </span>Profile
       </motion.h1>
 
       {/* Animated container */}

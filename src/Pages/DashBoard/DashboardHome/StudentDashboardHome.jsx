@@ -112,7 +112,7 @@ const StudentDashboardHome = () => {
         transition={{ duration: 0.35 }}
         className="text-3xl font-bold text-center mb-6"
       >
-        <span className="text-primary">{profile?.name?.split(" ")[0] || "Student"}</span> Dashboard
+        <span className="text-primary">{profile?.name?.split(" ")[0] || "Student"}</span> Profile
       </motion.h1>
 
       <motion.div

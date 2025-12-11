@@ -11,89 +11,103 @@ const TuitionsManagement = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [viewItem, setViewItem] = useState(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
-  const { data: applications = [], isLoading, refetch } = useQuery({
-    queryKey: ["applications", user?.email],
+  const studentEmailParam = user?.email ? encodeURIComponent(String(user.email).toLowerCase().trim()) : "";
+
+  const { data: rawResp, isLoading, refetch, } = useQuery({
+    queryKey: ["applications", "student", user?.email],
     queryFn: async () => {
-      const res = await axiosSecure.get(
-        `/applications?studentEmail=${encodeURIComponent(user.email)}`
-      );
-      return res.data || [];
+      console.debug("[TuitionsManagement] fetching applications for studentEmail:", studentEmailParam);
+      const res = await axiosSecure.get(`/applications?studentEmail=${studentEmailParam}`);
+      console.debug("[TuitionsManagement] raw response:", res?.data);
+      return res.data;
     },
     enabled: !!user?.email,
+    staleTime: 1000 * 30,
   });
 
- 
+  
+  const applications = Array.isArray(rawResp)
+    ? rawResp
+    : Array.isArray(rawResp?.results)
+    ? rawResp.results
+    : [];
+
   useEffect(() => {
     if (!viewItem) return;
     const stillExists = applications.find((a) => String(a._id) === String(viewItem._id));
     if (!stillExists || String(stillExists.status).toLowerCase() === "rejected") {
       setViewItem(null);
     } else {
-      
       setViewItem(stillExists);
     }
   }, [applications, viewItem]);
 
   if (isLoading) return <LoadingSpinner />;
 
+  
 
-  const visibleApplications = Array.isArray(applications)
-    ? applications.filter((a) => String(a.status).toLowerCase() !== "rejected")
-    : [];
+  const visibleApplications = applications.filter((a) => String(a.status).toLowerCase() !== "rejected");
 
   const openView = (item) => setViewItem(item);
   const closeView = () => setViewItem(null);
 
-
   const isFinalized = (status) => {
     const s = String(status || "").toLowerCase();
-    return s === "paid" || s === "confirmed";
+    return s === "paid" || s === "confirmed" || s === "approved";
   };
-
-  
- 
-
 
   const handleApprove = async (application) => {
     if (isFinalized(application.status)) {
-      Swal.fire({ icon: "info", title: "Already finalized", text: "This application is already paid/confirmed." });
+      Swal.fire({ icon: "info", title: "Already finalized", text: "This application is already paid/confirmed/approved." });
       return;
     }
-
     const confirm = await Swal.fire({
-      title: "Approve tutor application?",
-      text: `Approve ${application.tutorName} for "${application.subject}"?`,
+      title: "Approve & Pay tutor?",
+      text: `You will be redirected to payment for ${application.tutorName} — ৳${application.expectedSalary}`,
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Yes, approve",
+      confirmButtonText: "Proceed to Pay",
     });
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await axiosSecure.patch(`/applications/${application._id}`, { status: "approved" });
-      const ok =
-        (res?.data && (res.data.modifiedCount > 0 || res.data.acknowledged || res.data.success)) ||
-        Boolean(res?.data);
-      if (ok) {
-        await refetch();
-        Swal.fire({ icon: "success", title: "Approved", timer: 1200, showConfirmButton: false });
+      setProcessingPayment(true);
+
+      const paymentInfo = {
+        cost: application.expectedSalary,
+        paymentId: application._id,
+        studentEmail: application.studentEmail,
+        tutorEmail: application.tutorEmail,
+        subject: application.subject,
+        class: application.class,
+      };
+
+      const res = await axiosSecure.post("/create-checkout-session", paymentInfo);
+
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
       } else {
-        Swal.fire({ icon: "error", title: "Approve failed" });
+        Swal.fire({ icon: "error", title: "Payment error", text: "Payment session creation failed." });
       }
     } catch (err) {
-      console.error("Approve error", err);
+      console.error("Approve->Payment error", err);
       Swal.fire({
         icon: "error",
         title: "Error",
         text: err?.response?.data?.message || err?.message || "Server error",
       });
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
+  const handlePay = (application) => handleApprove(application);
+
   const handleReject = async (application) => {
     if (isFinalized(application.status)) {
-      Swal.fire({ icon: "info", title: "Already finalized", text: "Cannot reject a paid/confirmed application." });
+      Swal.fire({ icon: "info", title: "Already finalized", text: "Cannot reject a paid/confirmed/approved application." });
       return;
     }
 
@@ -127,46 +141,6 @@ const TuitionsManagement = () => {
     }
   };
 
-  const handlePay = async (application) => {
-    if (isFinalized(application.status)) {
-      Swal.fire({ icon: "info", title: "Already finalized", text: "This application is already paid/confirmed." });
-      return;
-    }
-
-    const confirm = await Swal.fire({
-      title: "Proceed to payment?",
-      text: `Pay for(${application.class}) — ৳${application.budget}`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Pay now",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const paymentInfo = {
-        cost: application.budget,
-        paymentId: application._id,
-        studentEmail: application.studentEmail,
-        tutorEmail: application.tutorEmail,
-      };
-
-      const res = await axiosSecure.post("/create-checkout-session", paymentInfo);
-
-      if (res?.data?.url) {
-        window.location.href = res.data.url;
-      } else {
-        Swal.fire({ icon: "error", title: "Payment error", text: "Payment session creation failed." });
-      }
-    } catch (err) {
-      console.error("Payment error", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err?.response?.data?.message || err?.message || "Server error",
-      });
-    }
-  };
-
   const formatDate = (iso) => {
     try {
       return new Date(iso).toLocaleString();
@@ -178,7 +152,6 @@ const TuitionsManagement = () => {
   return (
     <div className="p-4 md:p-6">
       <h2 className="text-2xl font-bold mb-4">Tuitions <span className="text-primary">Management</span></h2>
-     
 
       {visibleApplications.length === 0 ? (
         <p className="text-gray-500">No tutor applications to show.</p>
@@ -202,7 +175,7 @@ const TuitionsManagement = () => {
               <tbody>
                 {visibleApplications.map((app, idx) => {
                   const finalized = isFinalized(app.status);
-                 
+
                   return (
                     <tr key={app._id}>
                       <td>{idx + 1}</td>
@@ -227,36 +200,44 @@ const TuitionsManagement = () => {
                         >
                           {app.status}
                         </span>
-                      
                       </td>
                       <td className="text-xs text-gray-500">{formatDate(app.createdAt)}</td>
                       <td className="flex items-center gap-2 justify-center">
-                       
-                     
-                          <button onClick={() => openView(app)} className="btn btn-ghost btn-sm" title="View">
-                            <FiEye />
-                          </button>
-                     
-                       
+                        <button
+                          onClick={() => openView(app)}
+                          className="btn btn-ghost btn-sm"
+                          title="View"
+                          disabled={processingPayment}
+                        >
+                          <FiEye />
+                        </button>
+
                         {!finalized && (
                           <>
-                            <button onClick={() => handleApprove(app)} className="btn btn-ghost btn-sm" title="Accept">
+                            <button
+                              onClick={() => handleApprove(app)}
+                              className="btn btn-ghost btn-sm"
+                              title="Accept & Pay"
+                              disabled={processingPayment}
+                            >
                               <FiCheck />
                             </button>
 
-                            <button onClick={() => handleReject(app)} className="btn btn-ghost btn-sm" title="Reject">
+                            <button
+                              onClick={() => handleReject(app)}
+                              className="btn btn-ghost btn-sm"
+                              title="Reject"
+                              disabled={processingPayment}
+                            >
                               <FiX />
                             </button>
                           </>
                         )}
 
-                      
                         {finalized ? (
-                          <span className="text-green-700 text-sm">Paid / Confirmed</span>
+                          <span className="text-green-700 text-sm">Paid </span>
                         ) : (
-                          <button onClick={() => handlePay(app)} className="btn btn-ghost btn-sm" title="Pay">
-                            <FiDollarSign />
-                          </button>
+                          <span>pay</span>
                         )}
                       </td>
                     </tr>
@@ -270,7 +251,7 @@ const TuitionsManagement = () => {
           <div className="md:hidden space-y-4">
             {visibleApplications.map((app) => {
               const finalized = isFinalized(app.status);
-              
+
               return (
                 <article key={app._id} className="border p-4 rounded-lg shadow bg-white">
                   <div className="flex justify-between items-start">
@@ -295,19 +276,38 @@ const TuitionsManagement = () => {
                       >
                         {app.status}
                       </span>
-                    
+
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
                       <div className="flex gap-2">
-                      
-                          <button onClick={() => openView(app)} className="btn btn-square btn-sm" title="View"><FiEye /></button>
-                        
+                        <button
+                          onClick={() => openView(app)}
+                          className="btn btn-square btn-sm"
+                          title="View"
+                          disabled={processingPayment}
+                        >
+                          <FiEye />
+                        </button>
 
                         {!finalized && (
                           <>
-                            <button onClick={() => handleApprove(app)} className="btn btn-square btn-sm" title="Accept"><FiCheck /></button>
-                            <button onClick={() => handleReject(app)} className="btn btn-square btn-sm" title="Reject"><FiX /></button>
+                            <button
+                              onClick={() => handleApprove(app)}
+                              className="btn btn-square btn-sm"
+                              title="Accept"
+                              disabled={processingPayment}
+                            >
+                              <FiCheck />
+                            </button>
+                            <button
+                              onClick={() => handleReject(app)}
+                              className="btn btn-square btn-sm"
+                              title="Reject"
+                              disabled={processingPayment}
+                            >
+                              <FiX />
+                            </button>
                           </>
                         )}
                       </div>
@@ -316,7 +316,7 @@ const TuitionsManagement = () => {
                         {finalized ? (
                           <button className="btn btn-sm btn-disabled" disabled>Paid / Confirmed</button>
                         ) : (
-                          <button onClick={() => handlePay(app)} className="btn btn-sm"><FiDollarSign /> Pay</button>
+                          <button onClick={() => handlePay(app)} className="btn btn-sm" disabled={processingPayment}><FiDollarSign /> Pay</button>
                         )}
                       </div>
                     </div>
@@ -362,18 +362,35 @@ const TuitionsManagement = () => {
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-           
               {!isFinalized(viewItem.status) && (
                 <>
-                  <button onClick={() => handleApprove(viewItem)} className="btn btn-success"><FiCheck /> Accept</button>
-                  <button onClick={() => handleReject(viewItem)} className="btn btn-error"><FiX /> Reject</button>
+                  <button
+                    onClick={() => handleApprove(viewItem)}
+                    className="btn btn-success"
+                    disabled={processingPayment}
+                  >
+                    <FiCheck /> Accept & Pay
+                  </button>
+                  <button
+                    onClick={() => handleReject(viewItem)}
+                    className="btn btn-error"
+                    disabled={processingPayment}
+                  >
+                    <FiX /> Reject
+                  </button>
                 </>
               )}
 
               {isFinalized(viewItem.status) ? (
                 <button className="btn btn-primary btn-disabled" disabled><FiDollarSign /> Paid / Confirmed</button>
               ) : (
-                <button onClick={() => handlePay(viewItem)} className="btn btn-primary"><FiDollarSign /> Mark Paid</button>
+                <button
+                  onClick={() => handlePay(viewItem)}
+                  className="btn btn-primary"
+                  disabled={processingPayment}
+                >
+                  <FiDollarSign /> Pay
+                </button>
               )}
             </div>
           </div>

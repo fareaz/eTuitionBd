@@ -12,7 +12,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
-
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -31,7 +30,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // handle logout with toast notifications
   const handleLogout = async () => {
     try {
       await logOut();
@@ -43,11 +41,27 @@ const Navbar = () => {
     }
   };
 
-  // reusable nav class for NavLink
   const navClass = ({ isActive }) =>
-    `font-medium px-2 py-1 transition ${
-      isActive ? 'text-primary border-b-2 border-primary' : 'hover:text-primary'
-    }`;
+    `font-medium px-2 py-1 transition ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:text-primary'}`;
+
+  // Helper to render avatar or initial
+  const Avatar = ({ size = 8 }) => {
+    const initials = (user?.displayName || user?.email || 'U').slice(0, 1).toUpperCase();
+    return user?.photoURL ? (
+      <img
+        src={user.photoURL}
+        alt={user.displayName || 'avatar'}
+        className={`w-${size} h-${size} rounded-full object-cover`}
+      />
+    ) : (
+      <div
+        className={`w-${size} h-${size} rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold`}
+        aria-hidden="true"
+      >
+        {initials}
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-7xl mx-auto z-10">
@@ -71,22 +85,60 @@ const Navbar = () => {
               </ul>
             </nav>
 
-            {/* Right: Menu button + Dropdown */}
+            {/* Right: Menu / Profile */}
             <div className="relative z-20" ref={menuRef}>
+
+              {/* Mobile: menu icon button */}
               <button
                 onClick={() => setIsOpen(prev => !prev)}
                 aria-expanded={isOpen}
                 aria-controls="nav-dropdown"
                 aria-label="Open menu"
-                className="p-3 border flex items-center gap-2 rounded-full cursor-pointer hover:shadow-md transition"
+                className="p-3 border flex items-center gap-2 rounded-full cursor-pointer hover:shadow-md transition md:hidden"
               >
                 <AiOutlineMenu />
               </button>
+
+              {/* Desktop: Avatar + name button */}
+              <div className="hidden md:flex items-center">
+                {user ? (
+                  <button
+                    onClick={() => setIsOpen(prev => !prev)}
+                    aria-expanded={isOpen}
+                    aria-controls="nav-dropdown"
+                    aria-label="Open profile menu"
+                    className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-gray-100 transition"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setIsOpen(prev => !prev);
+                      }
+                    }}
+                  >
+                    {/* Avatar */}
+                    <span className="hidden lg:inline-block font-medium">
+                      {user.displayName || (user.email ? user.email.split('@')[0] : 'User')}
+                    </span>
+
+                    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M5.25 7.5L10 12.25 14.75 7.5z" />
+                    </svg>
+                  </button>
+                ) : (
+                  // If logged out, show plain links on desktop (optional)
+                  <div className="hidden md:flex gap-3">
+                    <NavLink to="/login" className={({ isActive }) => `font-medium px-2 py-1 transition ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:text-primary'}`}>Login</NavLink>
+                    <NavLink to="/register" className={({ isActive }) => `font-medium px-2 py-1 transition ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:text-primary'}`}>Register</NavLink>
+                  </div>
+                )}
+              </div>
 
               {/* Dropdown content */}
               {isOpen && (
                 <div
                   id="nav-dropdown"
+                  role="menu"
+                  aria-label="Navigation dropdown"
                   className="absolute right-0 mt-2 w-64 sm:w-56 rounded-xl shadow-md overflow-hidden bg-white text-sm border"
                 >
                   <div className="flex flex-col">
@@ -97,9 +149,7 @@ const Navbar = () => {
                         to="/"
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                          `block px-4 py-3 transition font-semibold ${
-                            isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                          }`
+                          `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                         }
                       >
                         Home
@@ -109,9 +159,7 @@ const Navbar = () => {
                         to="/tuitions"
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                          `block px-4 py-3 transition font-semibold ${
-                            isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                          }`
+                          `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                         }
                       >
                         Tuitions
@@ -121,9 +169,7 @@ const Navbar = () => {
                         to="/tutors"
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                          `block px-4 py-3 transition font-semibold ${
-                            isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                          }`
+                          `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                         }
                       >
                         Tutors
@@ -133,9 +179,7 @@ const Navbar = () => {
                         to="/about"
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                          `block px-4 py-3 transition font-semibold ${
-                            isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                          }`
+                          `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                         }
                       >
                         About
@@ -145,9 +189,7 @@ const Navbar = () => {
                         to="/contact"
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                          `block px-4 py-3 transition font-semibold ${
-                            isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                          }`
+                          `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                         }
                       >
                         Contact
@@ -156,20 +198,32 @@ const Navbar = () => {
 
                     <div className="border-t" />
 
-                    {/* Auth links (show on all sizes inside dropdown) */}
+                    {/* Auth-specific links */}
                     {user ? (
                       <>
+                        {/* Dashboard */}
                         <NavLink
                           to="/dashboard"
                           onClick={() => setIsOpen(false)}
                           className={({ isActive }) =>
-                            `block px-4 py-3 transition font-semibold ${
-                              isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                            }`
+                            `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                           }
                         >
                           Dashboard
                         </NavLink>
+
+                        {/* Profile */}
+                        <NavLink
+                          to="/dashboard"
+                          onClick={() => setIsOpen(false)}
+                          className={({ isActive }) =>
+                            `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
+                          }
+                        >
+                          Profile
+                        </NavLink>
+
+                        <div className="border-t" />
 
                         <button
                           onClick={handleLogout}
@@ -184,9 +238,7 @@ const Navbar = () => {
                           to="/login"
                           onClick={() => setIsOpen(false)}
                           className={({ isActive }) =>
-                            `block px-4 py-3 transition font-semibold ${
-                              isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                            }`
+                            `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                           }
                         >
                           Login
@@ -196,9 +248,7 @@ const Navbar = () => {
                           to="/register"
                           onClick={() => setIsOpen(false)}
                           className={({ isActive }) =>
-                            `block px-4 py-3 transition font-semibold ${
-                              isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'
-                            }`
+                            `block px-4 py-3 transition font-semibold ${isActive ? 'text-primary border-b-2 border-primary' : 'hover:bg-gray-50'}`
                           }
                         >
                           Sign Up
@@ -208,6 +258,7 @@ const Navbar = () => {
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </Container>

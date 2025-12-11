@@ -6,14 +6,15 @@ import { MdCheckCircle, MdSwipeDownAlt } from 'react-icons/md';
 import { IoIosCreate, IoMdCreate } from 'react-icons/io';
 import { ImProfile } from 'react-icons/im';
 import { Link, NavLink, Outlet } from 'react-router'; 
-import { AiFillControl } from 'react-icons/ai';
-import { RiUserAddFill } from 'react-icons/ri';
+import { AiFillControl, AiOutlineDollarCircle } from 'react-icons/ai';
+import { RiApps2AddLine, RiUserAddFill } from 'react-icons/ri';
 import { FaCirclePlus } from 'react-icons/fa6';
 import useRole from '../hooks/useRole';
 
 const DashboardLayout = () => {
   const { role } = useRole();
   const normalizedRole = role;
+  console.log(normalizedRole)
 
 
   const sidebarClass = ({ isActive }) =>
@@ -50,7 +51,7 @@ const DashboardLayout = () => {
               <path d="M14 10l2 2l-2 2"></path>
             </svg>
           </label>
-          <Link to="/dashboard" className="px-4"><h2 className="text-lg font-bold">e<span className='text-primary'>Tuition</span>Bd Dashboard</h2></Link>
+          <Link to="/" className="px-4"><h2 className="text-lg font-bold">e<span className='text-primary'>Tuition</span>Bd Dashboard</h2></Link>
         </nav>
 
         {/* Page content */}
@@ -98,20 +99,21 @@ const DashboardLayout = () => {
                   </NavLink>
                 </li>
 
+               
+
                 <li>
+                  <NavLink to="/dashboard/post_tuition" className={sidebarClass} data-tip="Post Tuition">
+                    <IoIosCreate />
+                    <span className="is-drawer-close:hidden">Post New Tuition</span>
+                  </NavLink>
+                </li>
+                
+                 <li>
                   <NavLink to="/dashboard/tuitions-management" className={sidebarClass} data-tip="Tuitions Management">
                     <AiFillControl />
                     <span className="is-drawer-close:hidden">Tuitions Management</span>
                   </NavLink>
                 </li>
-
-                <li>
-                  <NavLink to="/dashboard/post_tuition" className={sidebarClass} data-tip="Post Tuition">
-                    <IoIosCreate />
-                    <span className="is-drawer-close:hidden">Post Tuition</span>
-                  </NavLink>
-                </li>
-
                 <li>
                   <NavLink to="/dashboard/payment-history" className={sidebarClass} data-tip="Payment History">
                     <FaRegCreditCard />
@@ -125,9 +127,27 @@ const DashboardLayout = () => {
             {normalizedRole === 'tutor' && (
               <>
                 <li>
-                  <NavLink to="/dashboard/my-applications" className={sidebarClass} data-tip="My Applications">
+                  <NavLink to="/dashboard/my-tuition-applications" className={sidebarClass} data-tip="My Tuition Applications">
+                    <RiApps2AddLine />
+                    <span className="is-drawer-close:hidden">My Tuition Applications</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/ongoing-tuitions" className={sidebarClass} data-tip="Ongoing Tuitions">
+                    <FaCirclePlus />
+                    <span className="is-drawer-close:hidden">Ongoing Tuitions</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/revenue-history" className={sidebarClass} data-tip="Revenue History">
+                    <GrMoney />
+                    <span className="is-drawer-close:hidden">Revenue History</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/my-applications" className={sidebarClass} data-tip="My Tutor Applications">
                     <ImProfile />
-                    <span className="is-drawer-close:hidden">My Applications</span>
+                    <span className="is-drawer-close:hidden">My Tutor Applications</span>
                   </NavLink>
                 </li>
 
@@ -135,20 +155,6 @@ const DashboardLayout = () => {
                   <NavLink to="/dashboard/be-a-tutor" className={sidebarClass} data-tip="Apply Tutor">
                     <IoMdCreate />
                     <span className="is-drawer-close:hidden">Apply Tutor</span>
-                  </NavLink>
-                </li>
-
-                <li>
-                  <NavLink to="/dashboard/ongoing-tuitions" className={sidebarClass} data-tip="Ongoing Tuitions">
-                    <FaCirclePlus />
-                    <span className="is-drawer-close:hidden">Ongoing Tuitions</span>
-                  </NavLink>
-                </li>
-
-                <li>
-                  <NavLink to="/dashboard/revenue-history" className={sidebarClass} data-tip="Revenue History">
-                    <GrMoney />
-                    <span className="is-drawer-close:hidden">Revenue History</span>
                   </NavLink>
                 </li>
               </>
@@ -175,6 +181,12 @@ const DashboardLayout = () => {
                   <NavLink to="/dashboard/users-management" className={sidebarClass} data-tip="Users Management">
                     <FaUsers />
                     <span className="is-drawer-close:hidden">Users Management</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/admin-Payments" className={sidebarClass} data-tip="Admin Payments">
+                    <AiOutlineDollarCircle />
+                    <span className="is-drawer-close:hidden">Admin Payments</span>
                   </NavLink>
                 </li>
               </>

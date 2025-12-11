@@ -27,6 +27,8 @@ import PaymentSuccess from "../Pages/PaymentSuccess";
 import PaymentCancelled from "../Pages/PaymentCancelled";
 import RevenueHistory from "../Pages/RevenueHistory";
 import TutorRoute from "./TutorRoute";
+import MyTuitionApplication from "../Pages/DashBoard/MyTuitionApplication";
+import AdminPayments from "../Pages/DashBoard/AdminPayments";
 
 export const router = createBrowserRouter([
   {
@@ -105,6 +107,14 @@ export const router = createBrowserRouter([
       //tutor
 
       {
+        path: "my-tuition-applications",
+        element: (
+          <TutorRoute>
+            <MyTuitionApplication></MyTuitionApplication>
+          </TutorRoute>
+        ),
+      },
+      {
         path: "my-applications",
         element: (
           <TutorRoute>
@@ -161,6 +171,14 @@ export const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <UsersManagement></UsersManagement>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin-Payments",
+        element: (
+          <AdminRoute>
+            <AdminPayments></AdminPayments>
           </AdminRoute>
         ),
       },

@@ -69,7 +69,7 @@ const AdminDashboardHome = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-center mt-10">
-      <span className="text-primary">Admin</span> Dashboard 
+      <span className="text-primary">Admin</span> Profile 
       </h1>
 
       {isLoading && (

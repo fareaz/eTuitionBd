@@ -1,4 +1,4 @@
-
+// src/pages/tuitions/Tutors.jsx
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
@@ -11,14 +11,14 @@ import useRole from '../../hooks/useRole';
 const Tutors = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
-    const { role } = useRole();
+  const { role } = useRole();
   const navigate = useNavigate();
 
   const { data: tutors = [], isLoading } = useQuery({
     queryKey: ['approved-tutors'],
     queryFn: async () => {
       const res = await axiosSecure.get('/approved-tutors');
-      return res.data;
+      return res.data || [];
     }
   });
 
@@ -33,75 +33,22 @@ const Tutors = () => {
     setModalOpen(false);
   };
 
-
-  //   // if not logged in, redirect to login
-  //   if (!user) {
-  //     navigate('/login');
-  //     return;
-  //   }
-  //   // open modal with tutor details
-  //   openModal(tutor);
-  // };
   const handleContact = (tutor) => {
-  
-  if (!user) {
-    navigate('/login');
-    return;
-  }
-
- 
-  if (role !== 'student') {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Access denied!',
-      text: 'Only students can contact or apply to tutors.',
-    });
-    return;
-  }
-
-  openModal(tutor);
-};
-
-  const handlePay = async (tutor) => {
     if (!user) {
-     
       navigate('/login');
       return;
     }
 
-    try {
-      const confirm = await Swal.fire({
-        title: 'Proceed to payment?',
-        text: `Pay for  (${tutor.name}) — ৳${tutor.expectedSalary || 0}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Pay now',
+    if (role !== 'student') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Access denied!',
+        text: 'Only students can contact or apply to tutors.',
       });
-
-      if (!confirm.isConfirmed) return;
-
-      const paymentInfo = {
-        cost: Number(tutor.expectedSalary || 0),
-        paymentId: tutor._id,
-        studentEmail: user.email,
-        tutorEmail: tutor.email,
-        tutorName: tutor.name,
-       
-      };
-
-      const res = await axiosSecure.post('/create-checkout-session', paymentInfo);
-
-      if (res?.data?.url) {
-       
-        window.location.href = res.data.url;
-      } else {
-        console.error('create-checkout-session response:', res);
-        Swal.fire('Error', 'Could not create checkout session — please try again.', 'error');
-      }
-    } catch (err) {
-      console.error(err);
-      Swal.fire('Error', err?.message || 'Something went wrong', 'error');
+      return;
     }
+
+    openModal(tutor);
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -112,7 +59,6 @@ const Tutors = () => {
         Approved <span className="text-primary">Tutors</span> (<span className="text-primary">{tutors.length}</span>)
       </h1>
 
-     
       <div className="hidden md:block overflow-x-auto rounded-xl shadow bg-white">
         <table className="table w-full">
           <thead className="bg-gray-100 text-gray-700">
@@ -206,12 +152,6 @@ const Tutors = () => {
 
             <div className="flex gap-3 justify-end">
               <button className="btn btn-ghost" onClick={closeModal}>Close</button>
-              <button
-                className="btn btn-primary"
-                onClick={() => handlePay(selectedTutor)}
-              >
-                Pay ৳{selectedTutor.expectedSalary}
-              </button>
             </div>
           </div>
         </div>

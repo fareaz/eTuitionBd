@@ -1,13 +1,14 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import useAuth from "../../hooks/useAuth";
+
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Swal from "sweetalert2";
-import { FiTrash2, FiCheck } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
+import useAuth from "../../hooks/useAuth";
 
-/** Helpers */
+
 const statusBadge = (status) => {
   const s = String(status || "").toLowerCase();
   if (s === "paid") return "badge badge-info";
@@ -29,19 +30,30 @@ const formatDate = (iso) => {
 const TutorOngoingTuitions = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const [deletingId, setDeletingId] = useState(null);
 
-  const { data: applications = [], isLoading, refetch } = useQuery({
-    queryKey: ["tutor-ongoing", user?.email],
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["tutor-ongoing-approved", user?.email],
     queryFn: async () => {
-      const res = await axiosSecure.get(
-        `/applications?tutorEmail=${encodeURIComponent(user.email)}`
-      );
+      const email = encodeURIComponent(String(user?.email || "").toLowerCase().trim());
+      const res = await axiosSecure.get(`/applications/approved-for-me?email=${email}`);
       return res.data;
     },
-    enabled: !!user?.email,
+    enabled: Boolean(user?.email),
+    staleTime: 1000 * 30,
   });
 
-  // DELETE
+  const applications = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.results)
+    ? data.results
+    : [];
+
+  const total =
+    typeof data === "object" && !Array.isArray(data)
+      ? Number(data.total ?? applications.length)
+      : applications.length;
+
   const handleDelete = (app) => {
     Swal.fire({
       title: "Delete application?",
@@ -52,10 +64,12 @@ const TutorOngoingTuitions = () => {
     }).then((res) => {
       if (!res.isConfirmed) return;
 
+      setDeletingId(app._id);
       axiosSecure
         .delete(`/applications/${app._id}`)
         .then(() => {
           refetch();
+          setDeletingId(null);
           Swal.fire({
             icon: "success",
             title: "Deleted",
@@ -64,46 +78,13 @@ const TutorOngoingTuitions = () => {
           });
         })
         .catch((err) => {
-          Swal.fire({ icon: "error", title: "Error", text: err.message });
-        });
-    });
-  };
-
-  // CONFIRM ONLY WHEN paid
-  const handleConfirm = (app) => {
-    if (String(app.status).toLowerCase() !== "paid") {
-      return Swal.fire({
-        icon: "info",
-        title: "Not Allowed",
-        text: "Confirm only after student payment.",
-      });
-    }
-
-    Swal.fire({
-      title: "Confirm tuition?",
-      text: `Mark "${app.subject}" as confirmed?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Confirm",
-    }).then((res) => {
-      if (!res.isConfirmed) return;
-
-      axiosSecure
-        .patch(`/applications/${app._id}`, {
-          status: "confirmed",
-          updatedAt: new Date().toISOString(),
-        })
-        .then(() => {
-          refetch();
+          setDeletingId(null);
+          console.error("Delete error:", err);
           Swal.fire({
-            icon: "success",
-            title: "Confirmed",
-            timer: 1200,
-            showConfirmButton: false,
+            icon: "error",
+            title: "Error",
+            text: err?.response?.data?.message || err.message,
           });
-        })
-        .catch((err) => {
-          Swal.fire({ icon: "error", title: "Error", text: err.message });
         });
     });
   };
@@ -114,13 +95,14 @@ const TutorOngoingTuitions = () => {
     <div className="p-4 md:p-6">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-2xl font-semibold">Ongoing Tuitions</h2>
-          <p className="text-sm text-gray-500">These tuitions are approved by students or already paid.</p>
+          <h2 className="text-2xl font-bold">Ongoing <span className="text-primary">Tuitions</span></h2>
+          <p className="text-sm text-gray-500">These tuitions are approved by students.</p>
         </div>
 
         <div className="text-right">
           <div className="text-xs text-gray-500">Total</div>
-          <div className="text-lg font-semibold">{applications.length}</div>
+          <div className="text-lg font-semibold">{total}</div>
+          <div className="text-xs text-gray-500 mt-1">{isFetching ? "Updating..." : ""}</div>
         </div>
       </div>
 
@@ -130,7 +112,7 @@ const TutorOngoingTuitions = () => {
         </div>
       ) : (
         <>
-          {/* ---------- Desktop / Tablet table ---------- */}
+          {/* Desktop/table */}
           <div className="hidden sm:block">
             <div className="overflow-x-auto rounded-lg bg-base-100 shadow">
               <table className="min-w-[900px] w-full table table-zebra">
@@ -145,62 +127,37 @@ const TutorOngoingTuitions = () => {
                     <th>Budget</th>
                     <th>Status</th>
                     <th className="hidden md:table-cell">Created</th>
-                 
                     <th className="w-36 text-center">Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {applications.map((app, idx) => (
-                    <tr key={app._id}>
+                    <tr key={app._id ?? idx}>
                       <td>{idx + 1}</td>
-
                       <td>
                         <div className="font-semibold">{app.subject}</div>
                         <div className="text-xs text-gray-500 md:hidden">{app.class}</div>
                       </td>
-
                       <td className="hidden md:table-cell text-xs">{app.class}</td>
-
                       <td className="text-sm">{app.location}</td>
-
-                      <td className="min-w-[180px] break-words text-sm">{app.studentEmail}</td>
-
+                      <td className="min-w-[180px] break-words text-sm">{app.studentEmail || app.studentName || "—"}</td>
                       <td className="hidden lg:table-cell text-sm">৳{app.expectedSalary ?? "—"}</td>
-
-                      <td className="text-green-600 font-semibold">৳{app.budget}</td>
-
+                      <td className="text-green-600 font-semibold">৳{app.budget ?? "—"}</td>
                       <td>
                         <span className={statusBadge(app.status)}>{app.status}</span>
                       </td>
-
                       <td className="hidden md:table-cell text-xs text-gray-600">{formatDate(app.createdAt)}</td>
-
-                   
-                     
-
                       <td className="text-center">
                         <div className="flex items-center justify-center gap-2">
-
                           {String(app.status).toLowerCase() !== "paid" && (
-  <button
-    onClick={() => handleDelete(app)}
-    className="btn btn-error btn-sm text-white"
-    title="Delete"
-  >
-    <FiTrash2 />
-  </button>
-)}
-
-
-
-                          {String(app.status).toLowerCase() === "paid" && (
                             <button
-                              onClick={() => handleConfirm(app)}
-                              className="btn btn-success btn-sm"
-                              title="Confirm"
+                              onClick={() => handleDelete(app)}
+                              className="btn btn-error btn-sm text-white"
+                              title="Delete"
+                              disabled={deletingId === app._id}
                             >
-                              <FiCheck /> Confirm
+                              <FiTrash2 />
                             </button>
                           )}
                         </div>
@@ -212,10 +169,10 @@ const TutorOngoingTuitions = () => {
             </div>
           </div>
 
-     
+          {/* Mobile */}
           <div className="sm:hidden space-y-3">
             {applications.map((app, idx) => (
-              <div key={app._id} className="p-3 bg-base-100 rounded-lg border shadow">
+              <div key={app._id ?? idx} className="p-3 bg-base-100 rounded-lg border shadow">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -227,35 +184,33 @@ const TutorOngoingTuitions = () => {
                       </div>
                     </div>
 
-                    <div className="text-sm text-gray-600 mt-1 truncate">{app.class} • {app.location}</div>
+                    <div className="text-sm text-gray-600 mt-1 truncate">
+                      {app.class} • {app.location}
+                    </div>
 
                     <div className="mt-2 text-sm space-y-1">
-                      <div><strong>Student:</strong> <span className="break-words">{app.studentEmail}</span></div>
-                      <div><strong>Budget:</strong> <span className="font-semibold text-green-600">৳{app.budget}</span></div>
+                      <div>
+                        <strong>Student:</strong>{" "}
+                        <span className="break-words">{app.studentEmail || app.studentName || "—"}</span>
+                      </div>
+                      <div>
+                        <strong>Budget:</strong>{" "}
+                        <span className="font-semibold text-green-600">৳{app.budget ?? "—"}</span>
+                      </div>
                       <div className="text-xs text-gray-500">Created: {formatDate(app.createdAt)}</div>
-                  
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-3 flex gap-2">
                   {String(app.status).toLowerCase() !== "paid" && (
-  <button
-    onClick={() => handleDelete(app)}
-    className="btn btn-error btn-sm text-white"
-    title="Delete"
-  >
-    <FiTrash2 />
-  </button>
-)}
-
-
-                  {String(app.status).toLowerCase() === "paid" && (
                     <button
-                      onClick={() => handleConfirm(app)}
-                      className="btn btn-success btn-sm flex-1"
+                      onClick={() => handleDelete(app)}
+                      className="btn btn-error btn-sm text-white"
+                      title="Delete"
+                      disabled={deletingId === app._id}
                     >
-                      <FiCheck /> Confirm
+                      <FiTrash2 />
                     </button>
                   )}
                 </div>
