@@ -237,7 +237,7 @@ const TuitionsManagement = () => {
                         {finalized ? (
                           <span className="text-green-700 text-sm">Paid </span>
                         ) : (
-                          <span>pay</span>
+                          <span>Pay First</span>
                         )}
                       </td>
                     </tr>
@@ -313,10 +313,10 @@ const TuitionsManagement = () => {
                       </div>
 
                       <div className="flex gap-2 mt-2">
-                        {finalized ? (
-                          <button className="btn btn-sm btn-disabled" disabled>Paid / Confirmed</button>
+                         {finalized ? (
+                          <span className="text-green-700 text-sm">Paid </span>
                         ) : (
-                          <button onClick={() => handlePay(app)} className="btn btn-sm" disabled={processingPayment}><FiDollarSign /> Pay</button>
+                          <span>Pay First</span>
                         )}
                       </div>
                     </div>

@@ -60,8 +60,9 @@ const Login = () => {
       navigate(from, { replace: true })
     } catch (err) {
       console.error('Login error:', err)
+      reset()
       // reset form if specific firebase error
-      if (handleFirebaseInvalidCredential(err, reset)) return
+      // if (handleFirebaseInvalidCredential(err, reset)) return
       toast.error(err?.message || 'Login failed')
     }
   }
