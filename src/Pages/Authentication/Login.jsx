@@ -107,7 +107,7 @@ const Login = () => {
                 id='email'
                 {...register('email', { required: 'Email is required' })}
                 placeholder='Enter Your Email Here'
-                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
               />
               {errors.email && <p className='text-xs text-red-600 mt-1'>{errors.email.message}</p>}
             </div>
@@ -122,7 +122,7 @@ const Login = () => {
                 autoComplete='current-password'
                 {...register('password', { required: 'Password is required' })}
                 placeholder='*******'
-                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
               />
               {errors.password && <p className='text-xs text-red-600 mt-1'>{errors.password.message}</p>}
             </div>
@@ -131,7 +131,7 @@ const Login = () => {
           <div>
             <button
               type='submit'
-              className='bg-lime-500 w-full rounded-md py-3 text-white flex items-center justify-center'
+              className='bg-purple-800 w-full rounded-md py-3 text-white flex items-center justify-center'
               disabled={isSubmitting || loading}
             >
               {(isSubmitting || loading) ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
@@ -140,7 +140,7 @@ const Login = () => {
         </form>
 
         <div className='space-y-1'>
-          <button className='text-xs hover:underline hover:text-lime-500 text-gray-400 cursor-pointer'>
+          <button className='text-xs hover:underline hover:text-purple-800 text-gray-400 cursor-pointer'>
             Forgot password?
           </button>
         </div>
@@ -161,7 +161,7 @@ const Login = () => {
 
         <p className='px-6 text-sm text-center text-gray-400'>
           Don&apos;t have an account yet?{' '}
-          <Link state={from} to='/register' className='hover:underline hover:text-lime-500 text-gray-600'>Sign up</Link>.
+          <Link state={from} to='/register' className='hover:underline hover:text-purple-800 text-gray-600'>Sign up</Link>.
         </p>
       </div>
     </div>

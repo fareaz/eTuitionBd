@@ -1,4 +1,4 @@
-// src/pages/admin/ApproveTutors.jsx
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';

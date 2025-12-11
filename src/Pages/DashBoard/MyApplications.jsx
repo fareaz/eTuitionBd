@@ -1,4 +1,4 @@
-// src/pages/tutor/MyApplications.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FiEdit } from 'react-icons/fi';
@@ -130,9 +130,9 @@ const MyApplications = () => {
 
   return (
     <div className="p-4 md:p-6">
-      <h2 className="text-2xl font-semibold mb-4">My Applications: {applications.length}</h2>
+      <h2 className="text-2xl font-bold mb-4">My <span className='text-primary'>Applications</span> : {applications.length}</h2>
 
-      {/* Desktop / Table */}
+  
       <div className="hidden md:block overflow-x-auto">
         <table className="table w-full">
           <thead>
@@ -189,11 +189,18 @@ const MyApplications = () => {
           <article key={a._id} className="bg-white border rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold">{a.name}</h3>
+                <h3 className="text-lg font-semibold">{a.name}
+                  <span className={`badge px-3 py-1 ml-2 ${
+                    a.status === 'Approved' ? 'bg-green-100 text-green-700 border border-green-300'
+                    : a.status === 'Rejected' ? 'bg-red-100 text-red-700 border border-red-300'
+                    : 'bg-gray-100 text-gray-700 border border-gray-300'
+                  }`}>{a.status || 'Pending'}</span>
+                </h3>
                 <p className="text-sm text-gray-600">{a.qualifications}</p>
                 <p className="mt-1 text-sm text-gray-700">{a.experience}</p>
                 <p className="mt-2 text-sm">Expected Salary: <span className="font-semibold text-green-600">৳{a.expectedSalary}</span></p>
                 <p className="mt-1 text-xs text-gray-400">{formatDate(a.createdAt)}</p>
+                
               </div>
 
               <div className="flex flex-col items-end gap-2">

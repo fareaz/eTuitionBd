@@ -118,7 +118,7 @@ const Register = () => {
                 type='text'
                 id='name'
                 placeholder='Enter Your Name Here'
-                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
                 {...formRegister('name', {
                   required: 'Name is required',
                   maxLength: {
@@ -140,7 +140,7 @@ const Register = () => {
                 </label>
                 <select
                   id='role'
-                  className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                  className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
                   {...formRegister('role', { required: true })}
                 >
                   <option value='Student'>Student</option>
@@ -156,7 +156,7 @@ const Register = () => {
                   type='tel'
                   id='phone'
                   placeholder='01XXXXXXXXX'
-                  className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                  className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
                   {...formRegister('phone', {
                     required: 'Phone is required',
                     pattern: {
@@ -180,7 +180,7 @@ const Register = () => {
                 type='email'
                 id='email'
                 placeholder='Enter Your Email Here'
-                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
+                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
                 {...formRegister('email', {
                   required: 'Email is required',
                   pattern: {
@@ -202,19 +202,24 @@ const Register = () => {
                 </label>
               </div>
               <input
-                type='password'
-                autoComplete='new-password'
-                id='password'
-                placeholder='*******'
-                className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-lime-500 bg-gray-200 text-gray-900'
-                {...formRegister('password', {
-                  required: 'Password is required',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters',
-                  },
-                })}
-              />
+  type='password'
+  autoComplete='new-password'
+  id='password'
+  placeholder='*******'
+  className='w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-purple-800 bg-gray-200 text-gray-900'
+  {...formRegister('password', {
+    required: 'Password is required',
+    minLength: {
+      value: 6,
+      message: 'Password must be at least 6 characters',
+    },
+    pattern: {
+      value: /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/,
+      message: 'Password must contain at least 1 uppercase, 1 lowercase letter',
+    },
+  })}
+/>
+
               {errors.password && (
                 <p className='text-red-500 text-xs mt-1'>{errors.password.message}</p>
               )}
@@ -224,7 +229,7 @@ const Register = () => {
           <div>
             <button
               type='submit'
-              className='bg-lime-500 w-full rounded-md py-3 text-white disabled:opacity-60 flex justify-center items-center'
+              className='bg-purple-800 w-full rounded-md py-3 text-white disabled:opacity-60 flex justify-center items-center'
               disabled={loading || localUploading}
             >
               {loading || localUploading ? <TbFidgetSpinner className='animate-spin' /> : 'Continue'}
@@ -248,7 +253,7 @@ const Register = () => {
 
         <p className='px-6 text-sm text-center text-gray-400'>
           Already have an account?{' '}
-          <Link to='/login' className='hover:underline hover:text-lime-500 text-gray-600'>
+          <Link to='/login' className='hover:underline hover:text-purple-800 text-gray-600'>
             Login
           </Link>
           .

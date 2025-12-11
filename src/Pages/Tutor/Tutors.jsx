@@ -59,13 +59,12 @@ const Tutors = () => {
     return;
   }
 
-  // 3️⃣ Open modal if allowed
   openModal(tutor);
 };
 
   const handlePay = async (tutor) => {
     if (!user) {
-      // extra guard — shouldn't happen if modal only opens for logged in users
+     
       navigate('/login');
       return;
     }
@@ -87,13 +86,13 @@ const Tutors = () => {
         studentEmail: user.email,
         tutorEmail: tutor.email,
         tutorName: tutor.name,
-        // add any other fields your backend expects
+       
       };
 
       const res = await axiosSecure.post('/create-checkout-session', paymentInfo);
 
       if (res?.data?.url) {
-        // redirect browser to checkout url returned by backend
+       
         window.location.href = res.data.url;
       } else {
         console.error('create-checkout-session response:', res);
@@ -113,7 +112,7 @@ const Tutors = () => {
         Approved <span className="text-primary">Tutors</span> (<span className="text-primary">{tutors.length}</span>)
       </h1>
 
-      {/* Desktop / Tablet table */}
+     
       <div className="hidden md:block overflow-x-auto rounded-xl shadow bg-white">
         <table className="table w-full">
           <thead className="bg-gray-100 text-gray-700">

@@ -25,7 +25,7 @@ const AuthProvider = ({ children }) => {
     return createUserWithEmailAndPassword(auth, email, password)
   }
 
-  // renamed to `signIn` (camelCase) to match authInfo below
+ 
   const signIn = (email, password) => {
     setLoading(true)
     return signInWithEmailAndPassword(auth, email, password)
@@ -64,7 +64,7 @@ const AuthProvider = ({ children }) => {
     loading,
     setLoading,
     createUser,
-    signIn,             // now matches the function above
+    signIn,        
     signInWithGoogle,
     logOut,
     updateUserProfile,

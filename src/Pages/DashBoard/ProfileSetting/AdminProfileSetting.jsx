@@ -1,4 +1,4 @@
-// src/pages/admin/AdminProfileSetting.jsx
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 

@@ -4,11 +4,13 @@ import Footer from '../components/Footer'
 
 const MainLayout = () => {
   return (
-    <div className=''>
-      <Navbar />
-      <div className=''>
-        <Outlet />
+    <div >
+ 
+    
+      <div className='sticky top-0 bg-white  z-50 backdrop-blur-sm  shadow max-w-7xl mx-auto'>
+          <Navbar />
       </div>
+      <Outlet />
       <Footer />
     </div>
   )

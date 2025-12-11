@@ -1,4 +1,4 @@
-// src/pages/tuition/TutorApplyForm.jsx
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';

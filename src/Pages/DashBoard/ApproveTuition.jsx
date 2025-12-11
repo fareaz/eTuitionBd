@@ -8,7 +8,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 
 const ApproveTuition = () => {
   const axiosSecure = useAxiosSecure();
-  const [selected, setSelected] = useState(null); // selected tuition for modal
+  const [selected, setSelected] = useState(null);
   const {
     data: tuitions = [],
     refetch,
@@ -32,7 +32,7 @@ const ApproveTuition = () => {
   const openView = (t) => setSelected(t);
   const closeModal = () => setSelected(null);
 
-  // Reusable status change handler: can set 'Approved' or 'Rejected' etc.
+  
   const handleChangeStatus = async (t, newStatus) => {
     const confirm = await Swal.fire({
       title: `${newStatus === "Approved" ? "Approve" : "Reject"} this tuition?`,
@@ -46,11 +46,11 @@ const ApproveTuition = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      // Call the new status endpoint
+     
       const res = await axiosSecure.patch(`/tuitions/${t._id}/status`, {
         status: newStatus,
       });
-      // Some backends return result.modifiedCount, some return custom success.
+     
       const ok =
         res?.data?.modifiedCount ||
         res?.data?.modifiedCount === 1 ||
@@ -64,9 +64,9 @@ const ApproveTuition = () => {
           showConfirmButton: false,
         });
         refetch();
-        // if modal open, update selected to reflect change (or close)
+      
         if (selected && selected._id === t._id) {
-          // optionally refresh modal data or close
+     
           closeModal();
         }
       } else {

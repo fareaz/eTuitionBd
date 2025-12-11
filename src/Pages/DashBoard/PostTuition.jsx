@@ -1,7 +1,6 @@
 
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 import useAxiosSecure from '../../hooks/useAxiosSecure'
 import useAuth from '../../hooks/useAuth'
@@ -56,7 +55,6 @@ const PostTuition = () => {
           position: 'top-end',
         })
       } else {
-        // fallback
         Swal.fire({
           icon: 'success',
           title: 'Posted',
@@ -76,7 +74,7 @@ const PostTuition = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-base-100 rounded-2xl shadow-xl mt-10">
-      <h2 className="text-4xl font-extrabold text-center mb-10">Post a Tuition</h2>
+      <h2 className="text-4xl font-extrabold text-center mb-10">Post a <span className='text-primary'> Tuition</span></h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 text-black">
 
