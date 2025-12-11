@@ -162,69 +162,6 @@ Remove invalid posts
 
 Monitor payments
 
-📁 Project Structure
-/client
- ├── src
- │   ├── components/
- │   ├── hooks/
- │   ├── pages/
- │   ├── routes/
- │   ├── context/
- │   ├── App.jsx
- │   └── main.jsx
-
-/server
- ├── routes/
- ├── controllers/
- ├── config/
- ├── utils/
- ├── index.js
- └── .env
-
-⚙️ Installation
-1️⃣ Clone Repos
-git clone https://github.com/fareaz/eTuitionBd.git
-git clone https://github.com/fareaz/eTuitionBd-Server.git
-
-2️⃣ Install Dependencies
-Client
-cd eTuitionBd
-npm install
-
-Server
-cd eTuitionBd-Server
-npm install
-
-3️⃣ Add Environment Variables
-Client .env
-VITE_apiKey=your_firebase_key
-VITE_authDomain=your_firebase_domain
-VITE_backend_url=http://localhost:5000
-
-Server .env
-PORT=5000
-MONGODB_URI=your_mongo_string
-STRIPE_SECRET_KEY=your_key
-FIREBASE_SERVICE_ACCOUNT=your_json_credentials
-
-▶️ Running the Project
-Start Client
-npm run dev
-
-Start Server
-npm start
-
-📝 Main API Endpoints
-Method	Endpoint	Purpose
-GET	/tuitions/all	Get all approved tuitions
-POST	/tuitions/create	Student creates tuition
-POST	/tutors/create	Tutor creates profile/post
-POST	/apply	Tutor applies to tuition
-POST	/payment/create	Process payment
-GET	/payment-data	Admin payment overview
-📄 License
-
-MIT License
 
 👨‍💻 Developer
 
