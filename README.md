@@ -12,6 +12,31 @@ Email: admin@gmail.com
 
 Password: .......
 
+🔧 Stripe Test Cards (For Testing Payments)
+
+When testing your Stripe integration, use Stripe’s test card numbers.
+You can enter these cards in your own payment form or directly in the Stripe Dashboard.
+
+✅ Basic Test Card
+
+Use the most common Visa test card:
+
+4242 4242 4242 4242
+
+✅ Card Details Rules
+
+Expiry Date: Any valid future date
+Example: 12/34
+
+CVC: Any 3 digits
+For American Express use 4 digits.
+
+Other fields: Any value is acceptable (name, address, ZIP, etc.).
+
+⚠️ Important
+
+These cards only work in test mode. They will not charge real money.
+
 📦 GitHub Repositories
 
 Client: https://github.com/fareaz/eTuitionBd.git
