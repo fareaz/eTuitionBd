@@ -130,8 +130,7 @@ const Login = () => {
             <button
               type='submit'
               className='bg-purple-800 w-full rounded-md py-3 text-white flex items-center justify-center'
-              disabled={isSubmitting}
-            >
+              disabled={isSubmitting}>
               {isSubmitting ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
             </button>
           </div>
