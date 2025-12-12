@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const PaymentSuccess = () => {
     const [searchParams] = useSearchParams();
@@ -21,7 +22,7 @@ const PaymentSuccess = () => {
         }
     }, [sessionId, axiosSecure]);
 
-    if (loading) return <p className="text-center mt-10">Processing payment...</p>;
+    if (loading) return <LoadingSpinner></LoadingSpinner>;
 
     return (
         <div className="text-center mt-16">

@@ -1,6 +1,6 @@
-// src/pages/auth/Login.jsx
-import React from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router' // react-router-dom
+
+import React, { useState } from 'react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router' 
 import { FcGoogle } from 'react-icons/fc'
 import { TbFidgetSpinner } from 'react-icons/tb'
 import { useForm } from 'react-hook-form'
@@ -10,13 +10,16 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import useAxiosSecure from '../../hooks/useAxiosSecure'
 
 const Login = () => {
-  const { signIn, signInWithGoogle, loading, user } = useAuth()
+  const { signIn, signInWithGoogle,  user } = useAuth()
   const axiosSecure = useAxiosSecure()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
-  // react-hook-form setup
+
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  
   const {
     register,
     handleSubmit,
@@ -29,22 +32,18 @@ const Login = () => {
   const saveOrUpdateUser = async userObj => {
     try {
       const res = await axiosSecure.post('/users', userObj)
-      // console.log('saveOrUpdateUser (login) response:', res?.data)
       return res?.data
     } catch (err) {
       console.error('saveOrUpdateUser error (login):', err?.response?.data || err.message)
     }
   }
 
-  if (loading) return <LoadingSpinner />
+  // if (loading) return <LoadingSpinner />
   if (user) return <Navigate to={from} replace={true} />
 
-  // helper to handle the specific firebase credential error
   const handleFirebaseInvalidCredential = (err, resetFn) => {
-    // err may be an Error or firebase error object with .code
     const code = err?.code || err?.message || ''
-    if (code === 'auth/invalid-credential' || code.includes('invalid-credential')) {
-      // reset the form inputs
+    if (code === 'auth/invalid-credential' || code.includes('invalid-credential') || code.includes('wrong-password')) {
       resetFn()
       toast.error('Invalid credential — form has been reset. Please try again.')
       return true
@@ -52,41 +51,40 @@ const Login = () => {
     return false
   }
 
-  // form submit handler (email/password)
+
   const onSubmit = async data => {
     try {
+      // signIn should return a promise that rejects on error
       await signIn(data.email, data.password)
       toast.success('Login Successful')
       navigate(from, { replace: true })
     } catch (err) {
       console.error('Login error:', err)
       reset()
-      // reset form if specific firebase error
-      // if (handleFirebaseInvalidCredential(err, reset)) return
+   
+      if (handleFirebaseInvalidCredential(err, reset)) return
       toast.error(err?.message || 'Login failed')
     }
   }
 
   const handleGoogleSignIn = async () => {
+    setGoogleLoading(true)
     try {
       const result = await signInWithGoogle()
-      // console.log('Google sign-in user:', result.user)
-
       const userInfo = {
         email: result.user?.email || '',
         name: result.user?.displayName || '',
         phone: result.user?.phoneNumber || '',
         role: 'Student',
       }
-
       await saveOrUpdateUser(userInfo)
-
       toast.success('Signup successful')
       navigate(from, { replace: true })
     } catch (error) {
       console.error('Google sign-in error:', error)
-      if (handleFirebaseInvalidCredential(error, reset)) return
       toast.error('Google sign-in failed')
+    } finally {
+      setGoogleLoading(false)
     }
   }
 
@@ -132,9 +130,9 @@ const Login = () => {
             <button
               type='submit'
               className='bg-purple-800 w-full rounded-md py-3 text-white flex items-center justify-center'
-              disabled={isSubmitting || loading}
+              disabled={isSubmitting}
             >
-              {(isSubmitting || loading) ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
+              {isSubmitting ? <TbFidgetSpinner className='animate-spin m-auto' /> : 'Continue'}
             </button>
           </div>
         </form>
@@ -156,7 +154,7 @@ const Login = () => {
           className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 rounded cursor-pointer'
         >
           <FcGoogle size={32} />
-          <p>Continue with Google</p>
+          {googleLoading ? <TbFidgetSpinner className='animate-spin' /> : <p>Continue with Google</p>}
         </div>
 
         <p className='px-6 text-sm text-center text-gray-400'>
