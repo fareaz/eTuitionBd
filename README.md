@@ -10,7 +10,7 @@ Live Site: https://rad-zuccutto-e4a57a.netlify.app/
 
 Email: admin@gmail.com
 
-Password: 123A@a
+Password: .......
 
 📦 GitHub Repositories
 
